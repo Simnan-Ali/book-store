@@ -27,6 +27,12 @@
                 <a href="{{ route('admin.media.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.media.*')])><x-icon name="media"/><span>Media library</span></a>
             </nav>
 
+            <div class="sidebar-label sidebar-label--lower">WEBSITE</div>
+            <nav class="sidebar-nav" aria-label="Website management">
+                <a href="{{ route('admin.menus.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.menus.*')])><x-icon name="menu"/><span>Menu Master</span></a>
+                <a href="{{ route('admin.contact-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.contact-page-settings.*')])><x-icon name="contact"/><span>Contact Us Page Master</span></a>
+            </nav>
+
             <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>
             <nav class="sidebar-nav">
                 <a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="settings"/><span>My profile</span></a>

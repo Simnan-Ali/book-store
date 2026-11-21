@@ -77,8 +77,33 @@ document.querySelectorAll('[data-image-preview]').forEach((input) => {
         const file = input.files?.[0];
         if (!preview || !file) return;
 
+        const removeInputSelector = input.dataset.imageRemoveInput;
+        if (removeInputSelector) {
+            const removeInput = document.querySelector(removeInputSelector);
+            if (removeInput) removeInput.checked = false;
+        }
+
         preview.src = URL.createObjectURL(file);
         preview.hidden = false;
+    });
+});
+
+document.querySelectorAll('[data-image-remove]').forEach((input) => {
+    const preview = document.querySelector(input.dataset.imageRemove);
+    const fileInput = document.querySelector(input.dataset.imageFile);
+    if (!preview) return;
+
+    input.addEventListener('change', () => {
+        if (input.checked) {
+            if (fileInput) fileInput.value = '';
+            preview.hidden = true;
+            return;
+        }
+
+        if (preview.dataset.originalSrc) {
+            preview.src = preview.dataset.originalSrc;
+            preview.hidden = false;
+        }
     });
 });
 

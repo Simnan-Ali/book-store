@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Brand;
 use App\Models\Category;
+use App\Models\ContactPageSetting;
 use App\Models\Product;
 use App\Models\Subcategory;
 use App\Models\User;
@@ -19,6 +20,7 @@ class BookstoreAdminTest extends TestCase
     public function test_only_administrators_can_access_the_admin_panel(): void
     {
         $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
+        $this->get(route('admin.contact-page-settings.edit'))->assertRedirect(route('login'));
         $this->get(route('login'))->assertOk()->assertSee('Welcome back.');
 
         $this->actingAs(User::factory()->create())
@@ -26,6 +28,9 @@ class BookstoreAdminTest extends TestCase
             ->assertForbidden();
 
         $this->get(route('admin.settings.edit'))->assertForbidden();
+        $this->get(route('admin.contact-page-settings.edit'))->assertForbidden();
+        $this->put(route('admin.contact-page-settings.update'), $this->contactPagePayload())
+            ->assertForbidden();
     }
 
     public function test_administrator_can_sign_in_and_sign_out(): void
@@ -106,6 +111,141 @@ class BookstoreAdminTest extends TestCase
 
         $this->assertNull($admin->fresh()->avatar_path);
         Storage::disk('public')->assertDirectoryEmpty('avatars');
+    }
+
+    public function test_administrators_can_save_and_update_the_single_contact_page_record(): void
+    {
+        $this->actingAs($this->admin());
+
+        $this->get(route('admin.contact-page-settings.edit'))
+            ->assertOk()
+            ->assertSee('WEBSITE')
+            ->assertSee('Menu Master')
+            ->assertSee('Contact Us Page Master')
+            ->assertSee('Page title');
+        $this->assertDatabaseCount('contact_page_settings', 0);
+
+        $payload = $this->contactPagePayload();
+        $this->put(route('admin.contact-page-settings.update'), $payload)
+            ->assertRedirect(route('admin.contact-page-settings.edit'))
+            ->assertSessionHas('success');
+
+        $settings = ContactPageSetting::query()->findOrFail(ContactPageSetting::SINGLETON_ID);
+        $this->assertSame(ContactPageSetting::SINGLETON_ID, $settings->getKey());
+        $this->assertDatabaseHas('contact_page_settings', $payload + ['id' => ContactPageSetting::SINGLETON_ID]);
+
+        $updatedPayload = $this->contactPagePayload([
+            'page_title' => 'Visit Folio Books',
+            'page_subtitle' => 'Our team is ready to help',
+            'main_heading' => 'Come say hello',
+            'description' => 'Updated page introduction.',
+            'contact_email' => 'support@folio.example',
+            'contact_phone' => '+1 555 222 3344',
+            'whatsapp_number' => '+1 555 777 8899',
+            'office_address' => '42 Reading Lane, Portland',
+            'google_maps_url' => 'https://maps.example/folio-updated',
+            'business_hours' => '10:00 AM to 6:00 PM',
+            'working_days' => 'Tuesday to Saturday',
+            'additional_information' => 'Updated visitor information.',
+            'facebook_url' => 'https://facebook.example/folio-updated',
+            'instagram_url' => 'https://instagram.example/folio-updated',
+            'linkedin_url' => 'https://linkedin.example/folio-updated',
+            'youtube_url' => 'https://youtube.example/folio-updated',
+            'contact_form_heading' => 'Write to our team',
+            'contact_form_description' => 'Updated form introduction.',
+            'submit_button_text' => 'Send to Folio',
+            'success_message' => 'Your message is on its way.',
+            'meta_title' => 'Visit Folio Books',
+            'meta_description' => 'Updated search description.',
+            'meta_keywords' => 'books, folio, contact',
+        ]);
+
+        $this->put(route('admin.contact-page-settings.update'), $updatedPayload + ['id' => 99])
+            ->assertRedirect(route('admin.contact-page-settings.edit'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseCount('contact_page_settings', 1);
+        $this->assertDatabaseMissing('contact_page_settings', ['id' => 99]);
+        $this->assertDatabaseHas('contact_page_settings', $updatedPayload + [
+            'id' => ContactPageSetting::SINGLETON_ID,
+            'banner_image' => null,
+            'banner_alt_text' => null,
+        ]);
+        $this->get(route('admin.contact-page-settings.edit'))
+            ->assertOk()
+            ->assertSee('support@folio.example')
+            ->assertSee('Come say hello');
+    }
+
+    public function test_administrators_can_upload_replace_and_remove_contact_page_banner(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->admin());
+
+        $this->put(route('admin.contact-page-settings.update'), array_merge(
+            $this->contactPagePayload(),
+            ['banner_image' => $this->fakePng('contact-banner.png')],
+        ))->assertRedirect(route('admin.contact-page-settings.edit'));
+
+        $settings = ContactPageSetting::query()->findOrFail(ContactPageSetting::SINGLETON_ID);
+        $firstBannerPath = $settings->banner_image;
+        $this->assertNotNull($firstBannerPath);
+        Storage::disk('public')->assertExists($firstBannerPath);
+
+        $this->put(route('admin.contact-page-settings.update'), array_merge(
+            $this->contactPagePayload(['banner_alt_text' => 'Updated bookstore entrance']),
+            ['banner_image' => $this->fakePng('replacement-banner.png')],
+        ))->assertRedirect(route('admin.contact-page-settings.edit'));
+
+        $secondBannerPath = $settings->fresh()->banner_image;
+        $this->assertNotSame($firstBannerPath, $secondBannerPath);
+        Storage::disk('public')->assertMissing($firstBannerPath);
+        Storage::disk('public')->assertExists($secondBannerPath);
+
+        $this->put(route('admin.contact-page-settings.update'), array_merge(
+            $this->contactPagePayload(),
+            ['remove_banner_image' => 1],
+        ))->assertRedirect(route('admin.contact-page-settings.edit'))
+            ->assertSessionHas('success');
+
+        $this->assertDatabaseHas('contact_page_settings', [
+            'id' => ContactPageSetting::SINGLETON_ID,
+            'banner_image' => null,
+            'banner_alt_text' => null,
+        ]);
+        Storage::disk('public')->assertMissing($secondBannerPath);
+        $this->assertDatabaseCount('contact_page_settings', 1);
+    }
+
+    public function test_contact_page_settings_require_valid_contact_details_urls_and_banner_images(): void
+    {
+        Storage::fake('public');
+        $this->actingAs($this->admin());
+
+        $this->from(route('admin.contact-page-settings.edit'))
+            ->put(route('admin.contact-page-settings.update'), [])
+            ->assertSessionHasErrors([
+                'page_title',
+                'main_heading',
+                'contact_email',
+                'contact_form_heading',
+                'submit_button_text',
+                'success_message',
+            ]);
+
+        $this->from(route('admin.contact-page-settings.edit'))
+            ->put(route('admin.contact-page-settings.update'), array_merge(
+                $this->contactPagePayload([
+                    'contact_email' => 'not-an-email',
+                    'google_maps_url' => 'javascript:alert(1)',
+                    'facebook_url' => 'ftp://facebook.example/profile',
+                ]),
+                ['banner_image' => UploadedFile::fake()->create('banner.svg', 5, 'image/svg+xml')],
+            ))
+            ->assertSessionHasErrors(['contact_email', 'google_maps_url', 'facebook_url', 'banner_image']);
+
+        $this->assertDatabaseCount('contact_page_settings', 0);
+        Storage::disk('public')->assertDirectoryEmpty('contact-page');
     }
 
     public function test_category_crud_slug_uniqueness_and_dependency_guard(): void
@@ -269,6 +409,36 @@ class BookstoreAdminTest extends TestCase
     private function admin(): User
     {
         return User::factory()->create(['is_admin' => true]);
+    }
+
+    private function contactPagePayload(array $overrides = []): array
+    {
+        return array_merge([
+            'page_title' => 'Contact Folio Books',
+            'page_subtitle' => 'We are here to help',
+            'main_heading' => 'We would love to hear from you',
+            'description' => 'Get in touch with the Folio Books team.',
+            'banner_alt_text' => 'Folio Books storefront',
+            'contact_email' => 'hello@folio.example',
+            'contact_phone' => '+1 555 123 4567',
+            'whatsapp_number' => '+1 555 987 6543',
+            'office_address' => '10 Book Street, Portland',
+            'google_maps_url' => 'https://maps.example/folio',
+            'business_hours' => '9:00 AM to 5:00 PM',
+            'working_days' => 'Monday to Friday',
+            'additional_information' => 'Call ahead for special appointments.',
+            'facebook_url' => 'https://facebook.example/folio',
+            'instagram_url' => 'https://instagram.example/folio',
+            'linkedin_url' => 'https://linkedin.example/folio',
+            'youtube_url' => 'https://youtube.example/folio',
+            'contact_form_heading' => 'Send us a message',
+            'contact_form_description' => 'We will reply as soon as possible.',
+            'submit_button_text' => 'Send message',
+            'success_message' => 'Thank you. We will be in touch soon.',
+            'meta_title' => 'Contact Folio Books',
+            'meta_description' => 'Contact the Folio Books team.',
+            'meta_keywords' => 'bookstore, contact, Folio Books',
+        ], $overrides);
     }
 
     private function makeProduct(Brand $brand): Product

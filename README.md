@@ -50,6 +50,8 @@ A Laravel 13 bookstore administration panel for organizing a book catalogue, man
 
 - Admin-only session authentication with throttled login, profile photo, and password settings
 - Dashboard metrics, inventory alerts, category distribution, and recent activity
+- Menu Master with parent/child links, URL validation, display order, tab behavior, and active status for future storefront integration
+- Contact Us Page Master for single-record page copy, contact details, banner image, social links, and SEO settings
 - Searchable, filterable, paginated CRUD for categories, subcategories, publishers, and books
 - Book ISBN/SKU validation, calculated discount, stock status, cover and gallery image uploads
 - Protected relationship-aware deletion and activity logging
