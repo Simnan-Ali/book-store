@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>@yield('title', 'Overview') &middot; Folio Books</title>
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+</head>
+<body class="admin-body">
+    <div class="admin-shell">
+        <div class="sidebar-scrim" data-sidebar-close></div>
+        <aside class="admin-sidebar" id="admin-sidebar">
+            <a href="{{ route('admin.dashboard') }}" class="brand-lockup">
+                <span class="brand-mark"><x-icon name="book-open" class="h-6 w-6"/></span>
+                <span><strong>folio</strong><small>BOOKS ADMIN</small></span>
+            </a>
+
+            <div class="sidebar-label">WORKSPACE</div>
+            <nav class="sidebar-nav" aria-label="Main navigation">
+                <a href="{{ route('admin.dashboard') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><x-icon name="dashboard"/><span>Overview</span></a>
+                <a href="{{ route('admin.categories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.categories.*')])><x-icon name="categories"/><span>Categories</span></a>
+                <a href="{{ route('admin.subcategories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.subcategories.*')])><x-icon name="layers"/><span>Subcategories</span></a>
+                <a href="{{ route('admin.brands.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.brands.*')])><x-icon name="publishers"/><span>Publishers</span></a>
+                <a href="{{ route('admin.products.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.products.*')])><x-icon name="books"/><span>Books</span></a>
+                <a href="{{ route('admin.inventory') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.inventory')])><x-icon name="inventory"/><span>Inventory</span></a>
+                <a href="{{ route('admin.media.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.media.*')])><x-icon name="media"/><span>Media library</span></a>
+            </nav>
+
+            <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>
+            <nav class="sidebar-nav">
+                <a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="settings"/><span>My profile</span></a>
+            </nav>
+
+            <div class="sidebar-bottom">
+                <div class="sidebar-note">
+                    <span class="sidebar-note-icon"><x-icon name="trend" class="h-4 w-4"/></span>
+                    <p><strong>Your library, in focus.</strong><br>Everything you need to keep your shelves in order.</p>
+                </div>
+                <form method="POST" action="{{ route('admin.logout') }}">
+                    @csrf
+                    <button class="nav-link nav-logout" type="submit"><x-icon name="logout"/><span>Sign out</span></button>
+                </form>
+            </div>
+        </aside>
+
+        <div class="admin-main">
+            <header class="topbar">
+                <div class="topbar-left">
+                    <button class="icon-button mobile-menu-button" type="button" aria-label="Open navigation" data-sidebar-open><x-icon name="layers"/></button>
+                    <div class="breadcrumb"><span>Workspace</span><x-icon name="arrow" class="h-3 w-3 rotate-[-45deg]"/><strong>@yield('title', 'Overview')</strong></div>
+                </div>
+                <div class="topbar-right">
+                    <span class="today-label">{{ now()->format('l, F j') }}</span>
+                    <span class="topbar-divider"></span>
+                    <details class="account-menu" data-account-menu>
+                        <summary class="topbar-profile" aria-label="Open account menu">
+                            <x-user-avatar :user="auth()->user()" class="avatar"/>
+                            <span class="topbar-user"><strong>{{ auth()->user()->name }}</strong><small>Administrator</small></span>
+                            <span class="account-menu-caret" aria-hidden="true"></span>
+                        </summary>
+                        <div class="account-menu-panel">
+                            <a href="{{ route('admin.settings.edit') }}" class="account-menu-item"><x-icon name="user" class="h-4 w-4"/> My profile</a>
+                            <div class="account-menu-divider"></div>
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button class="account-menu-item account-menu-item--logout" type="submit"><x-icon name="logout" class="h-4 w-4"/> Sign out</button>
+                            </form>
+                        </div>
+                    </details>
+                </div>
+            </header>
+
+            <main class="page-content">
+                @if (session('success'))
+                    <div class="toast toast-success" role="status" data-toast><span class="toast-icon"><x-icon name="check"/></span><span>{{ session('success') }}</span><button type="button" aria-label="Dismiss notification" data-toast-close><x-icon name="close" class="h-4 w-4"/></button></div>
+                @endif
+                @if (session('error'))
+                    <div class="toast toast-error" role="alert" data-toast><span class="toast-icon"><x-icon name="close"/></span><span>{{ session('error') }}</span><button type="button" aria-label="Dismiss notification" data-toast-close><x-icon name="close" class="h-4 w-4"/></button></div>
+                @endif
+                @yield('content')
+            </main>
+            <footer class="page-footer"><span>&copy; {{ now()->year }} Folio Books</span><span>Made for the love of reading.</span></footer>
+        </div>
+    </div>
+
+    <dialog class="confirm-dialog" id="confirm-dialog">
+        <form method="dialog" class="confirm-dialog-card">
+            <span class="dialog-warning"><x-icon name="trash" class="h-5 w-5"/></span>
+            <h2>Delete this item?</h2>
+            <p data-confirm-message>This action cannot be undone.</p>
+            <div class="dialog-actions">
+                <button class="button button-muted" value="cancel">Keep it</button>
+                <button class="button button-danger" type="button" data-confirm-submit>Yes, delete</button>
+            </div>
+        </form>
+    </dialog>
+</body>
+</html>
