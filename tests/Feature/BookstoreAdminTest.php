@@ -379,10 +379,19 @@ class BookstoreAdminTest extends TestCase
         $this->assertCount(1, $product->images);
         Storage::disk('public')->assertExists($product->main_image);
         Storage::disk('public')->assertExists($product->images->first()->image_path);
+        $this->get(route('admin.products.show', $product))
+            ->assertOk()
+            ->assertSee('The Quiet Atlas')
+            ->assertSee('Modern Poetry')
+            ->assertSee('Verse House')
+            ->assertSee('Book details');
         $this->get(route('admin.media.index'))->assertOk()->assertSee('The Quiet Atlas');
         $this->get(route('admin.inventory'))->assertOk()->assertSee('The Quiet Atlas');
         $this->get(route('admin.products.index', ['q' => 'QUIET', 'stock' => 'low']))
-            ->assertOk()->assertSee('The Quiet Atlas');
+            ->assertOk()
+            ->assertSee('The Quiet Atlas')
+            ->assertSee(route('admin.products.show', $product), false);
+        $this->get(route('admin.products.show', 999999))->assertNotFound();
 
         $this->from(route('admin.products.create'))
             ->post(route('admin.products.store'), $this->productPayload($category, $brand, $subcategory))

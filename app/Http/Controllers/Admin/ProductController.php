@@ -83,6 +83,13 @@ class ProductController extends Controller
         ]);
     }
 
+    public function show(Product $product): View
+    {
+        $product->load(['category', 'subcategory', 'brand', 'images']);
+
+        return view('admin.products.show', ['product' => $product]);
+    }
+
     public function store(ProductRequest $request): RedirectResponse
     {
         $data = $request->safe()->except(['main_image', 'images']);

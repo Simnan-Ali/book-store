@@ -24,7 +24,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::resource('menus', MenuController::class)->except('show');
     Route::patch('/menus/{menu}/status', [MenuController::class, 'toggleStatus'])->name('menus.status');
     Route::resource('brands', BrandController::class)->except('show');
-    Route::resource('products', ProductController::class)->except('show');
+    Route::resource('products', ProductController::class);
     Route::get('/inventory', [ProductController::class, 'index'])->defaults('inventory', true)->name('inventory');
     Route::get('/media', MediaLibraryController::class)->name('media.index');
     Route::get('/settings', [ProfileController::class, 'edit'])->name('settings.edit');

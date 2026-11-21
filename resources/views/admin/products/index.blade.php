@@ -43,7 +43,7 @@
                                 @elseif ($product->isLowStock())<span class="status-pill stock-low">Low stock</span>
                                 @else<span class="status-pill stock-in">In stock</span>@endif
                             </td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.products.edit', $product) }}" aria-label="Edit {{ $product->title }}"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.products.destroy', $product) }}" data-confirm="This will remove the book and its uploaded images from your active catalogue.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $product->title }}"><x-icon name="trash"/></button></form></div></td>
+                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.products.show', $product) }}" aria-label="View details for {{ $product->title }}" title="View details"><x-icon name="eye"/></a><a class="row-action" href="{{ route('admin.products.edit', $product) }}" aria-label="Edit {{ $product->title }}" title="Edit"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.products.destroy', $product) }}" data-confirm="This will remove the book and its uploaded images from your active catalogue.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $product->title }}" title="Delete"><x-icon name="trash"/></button></form></div></td>
                         </tr>
                     @endforeach
                 </tbody>
