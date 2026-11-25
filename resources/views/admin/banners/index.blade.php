@@ -21,14 +21,14 @@
 
     <section class="panel table-panel">
         @if ($banners->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="banner"/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No banners found' : 'Give your future storefront a little life' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Create a banner to manage campaign imagery and content for your future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status'])) @can('banners.create')<a href="{{ route('admin.banners.create') }}" class="button button-primary button-small">Create your first banner</a>@endcan @endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="book-open" data-image-placeholder/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No banners found' : 'Give your future storefront a little life' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Create a banner to manage campaign imagery and content for your future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status'])) @can('banners.create')<a href="{{ route('admin.banners.create') }}" class="button button-primary button-small">Create your first banner</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table banner-table">
                 <thead><tr><th>Banner</th><th>Type</th><th>Display order</th><th>Gallery</th><th>Status</th><th>Dates</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
                 <tbody>
                     @foreach ($banners as $banner)
                         <tr>
-                            <td><div class="table-item"><span class="table-thumbnail banner-thumbnail">@if ($banner->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($banner->main_image) }}" alt="{{ $banner->image_alt ?: $banner->title }}" loading="lazy">@else<x-icon name="banner"/>@endif</span><span><span class="table-primary">{{ $banner->title }}</span><span class="table-secondary">{{ $banner->name }} · /{{ $banner->slug }}</span></span></div></td>
+                            <td><div class="table-item"><span class="table-thumbnail banner-thumbnail">@if ($banner->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($banner->main_image) }}" alt="{{ $banner->image_alt ?: $banner->title }}" loading="lazy">@else<x-icon name="book-open" data-image-placeholder/>@endif</span><span><span class="table-primary">{{ $banner->title }}</span><span class="table-secondary">{{ $banner->name }} · /{{ $banner->slug }}</span></span></div></td>
                             <td><span class="banner-type-pill banner-type-{{ $banner->type }}">{{ ['main' => 'Main banner', 'promotional' => 'Promotional', 'other' => 'Other'][$banner->type] }}</span></td>
                             <td><span class="banner-order">{{ $banner->sort_order }}</span></td>
                             <td>{{ number_format($banner->images_count) }} {{ \Illuminate\Support\Str::plural('image', $banner->images_count) }}</td>

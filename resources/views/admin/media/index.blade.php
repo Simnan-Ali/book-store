@@ -8,7 +8,7 @@
         <span class="status-pill status-active">{{ number_format($assetCount) }} {{ \Illuminate\Support\Str::plural('image', $assetCount) }}</span>
     </div>
     @if ($assets->isEmpty())
-        <section class="panel"><div class="empty-state"><span class="empty-icon"><x-icon name="media"/></span><strong>Your image library is empty</strong><p>Book covers and gallery images you upload will be collected here.</p>@can('books.create')<a href="{{ route('admin.products.create') }}" class="button button-primary button-small">Add a book</a>@endcan</div></section>
+        <section class="panel"><div class="empty-state"><span class="empty-icon"><x-icon name="book-open" data-image-placeholder/></span><strong>Your image library is empty</strong><p>Book covers and gallery images you upload will be collected here.</p>@can('books.create')<a href="{{ route('admin.products.create') }}" class="button button-primary button-small">Add a book</a>@endcan</div></section>
     @else
         <div class="media-grid">
             @foreach ($assets as $asset)

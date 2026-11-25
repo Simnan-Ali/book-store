@@ -246,14 +246,17 @@
                         <input id="banner_image" name="banner_image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-image-preview="#contact-banner-preview" data-image-remove-input="#remove-banner-image">
                     </label>
                     @error('banner_image')<p class="field-error">{{ $message }}</p>@enderror
-                    <img
-                        id="contact-banner-preview"
-                        class="image-preview contact-banner-preview"
-                        src="{{ $settings->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->banner_image) : '' }}"
-                        data-original-src="{{ $settings->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->banner_image) : '' }}"
-                        alt="Contact Us banner preview"
-                        @if (! $settings->banner_image || old('remove_banner_image')) hidden @endif
-                    >
+                    <div class="image-preview-frame" data-image-preview-frame>
+                        <span class="image-placeholder-preview contact-banner-placeholder" data-image-placeholder @if ($settings->banner_image && ! old('remove_banner_image')) hidden @endif><x-icon name="book-open" class="h-8 w-8"/></span>
+                        <img
+                            id="contact-banner-preview"
+                            class="image-preview contact-banner-preview"
+                            src="{{ $settings->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->banner_image) : '' }}"
+                            data-original-src="{{ $settings->banner_image ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->banner_image) : '' }}"
+                            alt="Contact Us banner preview"
+                            @if (! $settings->banner_image || old('remove_banner_image')) hidden @endif
+                        >
+                    </div>
                     <input type="hidden" name="remove_banner_image" value="0">
                     @if ($settings->banner_image)
                         <label class="remove-avatar-label" for="remove-banner-image">

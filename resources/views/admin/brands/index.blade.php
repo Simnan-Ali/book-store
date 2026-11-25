@@ -24,7 +24,7 @@
                 <tbody>
                     @foreach ($brands as $brand)
                         <tr>
-                            <td><div class="table-item"><span class="table-thumbnail">@if ($brand->logo)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($brand->logo) }}" alt="" loading="lazy">@else<x-icon name="publishers"/>@endif</span><span><span class="table-primary">{{ $brand->name }}</span><span class="table-secondary">/{{ $brand->slug }}</span></span></div></td>
+                            <td><div class="table-item"><span class="table-thumbnail">@if ($brand->logo)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($brand->logo) }}" alt="" loading="lazy">@else<x-icon name="book-open" data-image-placeholder/>@endif</span><span><span class="table-primary">{{ $brand->name }}</span><span class="table-secondary">/{{ $brand->slug }}</span></span></div></td>
                             <td>@if ($brand->email)<span class="table-primary">{{ $brand->email }}</span>@elseif ($brand->website_url)<span class="table-primary">{{ \Illuminate\Support\Str::limit($brand->website_url, 30) }}</span>@else<span class="table-secondary">No contact details</span>@endif</td>
                             <td>{{ number_format($brand->products_count) }}</td>
                             <td><span class="status-pill {{ $brand->is_active ? 'status-active' : 'status-inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td>

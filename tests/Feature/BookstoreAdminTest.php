@@ -34,6 +34,50 @@ class BookstoreAdminTest extends TestCase
             ->assertForbidden();
     }
 
+    public function test_admin_image_areas_show_the_book_icon_when_images_are_missing(): void
+    {
+        $this->actingAs($this->admin());
+        $category = Category::create(['name' => 'Mystery', 'slug' => 'mystery', 'is_active' => true]);
+        $subcategory = Subcategory::create([
+            'category_id' => $category->id,
+            'name' => 'Cozy Mystery',
+            'slug' => 'cozy-mystery',
+            'is_active' => true,
+        ]);
+        $brand = Brand::create(['name' => 'Northstar Press', 'slug' => 'northstar-press', 'is_active' => true]);
+        $product = Product::create(array_merge(
+            $this->productPayload($category, $brand, $subcategory),
+            ['slug' => 'cozy-mystery-book'],
+        ));
+
+        $pages = [
+            [route('admin.categories.index'), '/<span class="table-thumbnail"[^>]*>\s*<svg[^>]*data-image-placeholder/s'],
+            [route('admin.subcategories.index'), '/<span class="table-thumbnail"[^>]*>\s*<svg[^>]*data-image-placeholder/s'],
+            [route('admin.brands.index'), '/<span class="table-thumbnail"[^>]*>\s*<svg[^>]*data-image-placeholder/s'],
+            [route('admin.products.index'), '/<span class="table-thumbnail"[^>]*>\s*<svg[^>]*data-image-placeholder/s'],
+            [route('admin.inventory'), '/<span class="table-thumbnail"[^>]*>\s*<svg[^>]*data-image-placeholder/s'],
+            [route('admin.products.show', $product), '/<div class="product-cover-placeholder"><svg[^>]*data-image-placeholder/s'],
+            [route('admin.media.index'), '/<span class="empty-icon"><svg[^>]*data-image-placeholder/s'],
+            [route('admin.banners.index'), '/<span class="empty-icon"><svg[^>]*data-image-placeholder/s'],
+            [route('admin.settings.edit'), '/<span[^>]*data-profile-avatar[^>]*>.*?data-image-placeholder/s'],
+            [route('admin.about-page-settings.edit'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview" data-image-placeholder/s'],
+            [route('admin.contact-page-settings.edit'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview contact-banner-placeholder" data-image-placeholder/s'],
+            [route('admin.categories.create'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview" data-image-placeholder/s'],
+            [route('admin.subcategories.create'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview" data-image-placeholder/s'],
+            [route('admin.brands.create'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview" data-image-placeholder/s'],
+            [route('admin.products.create'), '/<div class="image-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview" data-image-placeholder/s'],
+            [route('admin.banners.create'), '/<div class="banner-main-preview-frame" data-image-preview-frame>\s*<span class="image-placeholder-preview banner-main-placeholder" data-image-placeholder/s'],
+        ];
+
+        foreach ($pages as [$page, $placeholderPattern]) {
+            $response = $this->get($page)->assertOk();
+
+            $placeholderCount = preg_match_all($placeholderPattern, $response->getContent());
+
+            $this->assertSame(1, $placeholderCount, "Expected one book icon placeholder on {$page}.");
+        }
+    }
+
     public function test_administrator_can_sign_in_and_sign_out(): void
     {
         $admin = User::factory()->create(['is_admin' => true]);

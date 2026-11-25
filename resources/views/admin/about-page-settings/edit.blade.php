@@ -90,14 +90,17 @@
                         <input id="image" name="image" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-image-preview="#about-image-preview" data-image-remove-input="#remove-about-image">
                     </label>
                     @error('image')<p class="field-error">{{ $message }}</p>@enderror
-                    <img
-                        id="about-image-preview"
-                        class="image-preview"
-                        src="{{ $settings->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->image_path) : '' }}"
-                        data-original-src="{{ $settings->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->image_path) : '' }}"
-                        alt="{{ $settings->image_alt ?: 'About Us image preview' }}"
-                        @if (! $settings->image_path || old('remove_image')) hidden @endif
-                    >
+                    <div class="image-preview-frame" data-image-preview-frame>
+                        <span class="image-placeholder-preview" data-image-placeholder @if ($settings->image_path && ! old('remove_image')) hidden @endif><x-icon name="book-open" class="h-8 w-8"/></span>
+                        <img
+                            id="about-image-preview"
+                            class="image-preview"
+                            src="{{ $settings->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->image_path) : '' }}"
+                            data-original-src="{{ $settings->image_path ? \Illuminate\Support\Facades\Storage::disk('public')->url($settings->image_path) : '' }}"
+                            alt="{{ $settings->image_alt ?: 'About Us image preview' }}"
+                            @if (! $settings->image_path || old('remove_image')) hidden @endif
+                        >
+                    </div>
                     <input id="image_alt" name="image_alt" type="hidden" value="{{ $settings->image_alt }}">
                     <input type="hidden" name="remove_image" value="0">
                     @if ($settings->image_path)

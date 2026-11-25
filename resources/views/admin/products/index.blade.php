@@ -32,7 +32,7 @@
                 <tbody>
                     @foreach ($products as $product)
                         <tr>
-                            <td><div class="table-item"><span class="table-thumbnail">@if ($product->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="" loading="lazy">@else<x-icon name="book-open"/>@endif</span><span><span class="table-primary">{{ $product->title }}</span><span class="table-secondary">{{ $product->author }} &middot; SKU {{ $product->sku }}</span></span></div></td>
+                            <td><div class="table-item"><span class="table-thumbnail">@if ($product->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="" loading="lazy">@else<x-icon name="book-open" data-image-placeholder/>@endif</span><span><span class="table-primary">{{ $product->title }}</span><span class="table-secondary">{{ $product->author }} &middot; SKU {{ $product->sku }}</span></span></div></td>
                             <td><span class="table-primary">{{ $product->category->name }}</span>@if ($product->subcategory)<span class="table-secondary">{{ $product->subcategory->name }}</span>@endif</td>
                             <td>{{ $product->brand->name }}</td>
                             <td>{{ $product->vendor?->name ?? 'Unassigned' }}</td>

@@ -64,6 +64,7 @@ button { cursor: pointer; }
 .user-avatar { align-items: center; border-radius: 50%; flex: 0 0 auto; justify-content: center; overflow: hidden; }
 .user-avatar img { height: 100%; object-fit: cover; width: 100%; }
 .user-avatar > span { align-items: center; display: flex; height: 100%; justify-content: center; width: 100%; }
+.user-avatar > span svg { height: 55%; width: 55%; }
 .avatar--large { font-size: 20px; height: 64px; width: 64px; }
 .topbar-user { display: flex; flex-direction: column; gap: 2px; }
 .topbar-user strong { color: #3e4843; font-size: 11px; font-weight: 700; }
@@ -271,6 +272,10 @@ button { cursor: pointer; }
 .image-preview { border: 1px solid #ebefea; border-radius: 7px; display: block; margin-top: 9px; max-height: 170px; object-fit: cover; width: 100%; }
 .contact-banner-preview { aspect-ratio: 16 / 7; background: #f3f5f2; }
 .image-preview[hidden] { display: none; }
+.image-placeholder-preview { align-items: center; background: #f3f5f2; border: 1px dashed #dfe6df; border-radius: 7px; color: #829589; display: flex; justify-content: center; margin-top: 9px; min-height: 100px; width: 100%; }
+.image-placeholder-preview[hidden] { display: none; }
+.contact-banner-placeholder { aspect-ratio: 16 / 7; min-height: 0; }
+.image-gallery-placeholder { grid-column: 1 / -1; margin: 0; min-height: 80px; }
 .existing-image-grid { display: grid; gap: 7px; grid-template-columns: repeat(3, minmax(0, 1fr)); margin: 10px 0; }
 .existing-image { aspect-ratio: 1; border: 1px solid #eaede9; border-radius: 6px; overflow: hidden; position: relative; }
 .existing-image img { height: 100%; object-fit: cover; width: 100%; }
@@ -408,8 +413,10 @@ button { cursor: pointer; }
 .banner-form-layout .form-panel { min-width: 0; }
 .banner-main-upload { align-items: flex-start; display: grid; gap: 12px; grid-template-columns: minmax(0, 1fr) 190px; }
 .banner-main-upload .upload-drop { min-height: 150px; }
+.banner-main-preview-frame { min-width: 0; width: 100%; }
 .banner-main-preview { border: 1px solid #e8ece7; border-radius: 8px; height: 150px; object-fit: cover; width: 100%; }
 .banner-main-preview[hidden] { display: none; }
+.banner-main-placeholder { border-radius: 8px; height: 150px; margin: 0; min-height: 0; }
 .banner-image-meta { align-items: center; margin-top: 13px; }
 .remove-main-image { align-items: center; color: #a6574e; display: flex; font-size: 9px; gap: 7px; }
 .remove-main-image input { accent-color: #a6574e; }
@@ -499,6 +506,7 @@ button { cursor: pointer; }
     .form-sidebar { grid-template-columns: 1fr; }
     .banner-main-upload { grid-template-columns: 1fr; }
     .banner-main-preview { height: auto; max-height: 220px; }
+    .banner-main-placeholder { aspect-ratio: 16 / 9; height: auto; }
     .banner-content-options { grid-template-columns: 1fr; }
     .banner-gallery-grid { grid-template-columns: 1fr; }
     .banner-gallery-upload-footer { align-items: stretch; flex-direction: column; }

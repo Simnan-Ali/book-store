@@ -27,7 +27,7 @@
                     <tbody>
                         @foreach ($categories as $category)
                             <tr>
-                                <td><div class="table-item"><span class="table-thumbnail">@if ($category->image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->image) }}" alt="" loading="lazy">@else<x-icon name="categories"/>@endif</span><span><span class="table-primary">{{ $category->name }}</span><span class="table-secondary">/{{ $category->slug }}</span></span></div></td>
+                                <td><div class="table-item"><span class="table-thumbnail">@if ($category->image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($category->image) }}" alt="" loading="lazy">@else<x-icon name="book-open" data-image-placeholder/>@endif</span><span><span class="table-primary">{{ $category->name }}</span><span class="table-secondary">/{{ $category->slug }}</span></span></div></td>
                                 <td>{{ number_format($category->products_count) }}</td><td>{{ number_format($category->subcategories_count) }}</td>
                                 <td><span class="status-pill {{ $category->is_active ? 'status-active' : 'status-inactive' }}">{{ $category->is_active ? 'Active' : 'Inactive' }}</span></td>
                                 <td>{{ $category->created_at->format('M j, Y') }}</td>

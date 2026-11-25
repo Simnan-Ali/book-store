@@ -21,7 +21,7 @@
                 @if ($product->main_image)
                     <img class="product-detail-cover" src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="{{ $product->title }} cover">
                 @else
-                    <div class="product-cover-placeholder"><x-icon name="book-open" class="h-10 w-10"/><span>No cover image</span></div>
+                    <div class="product-cover-placeholder"><x-icon name="book-open" class="h-10 w-10" data-image-placeholder/><span>No cover image</span></div>
                 @endif
             </div>
 

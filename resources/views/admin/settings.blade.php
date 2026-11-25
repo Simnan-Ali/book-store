@@ -14,7 +14,7 @@
                 @csrf @method('PUT')
                 @cannot('profile.edit')<fieldset disabled>@endcannot
                 <div class="profile-photo-section">
-                    <x-user-avatar :user="$user" class="avatar avatar--large"/>
+                    <x-user-avatar :user="$user" class="avatar avatar--large" data-profile-avatar/>
                     <div class="profile-photo-controls">
                         <input id="avatar" class="visually-hidden-file" name="avatar" type="file" accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp" data-image-preview="#avatar-preview">
                         <label class="field-label" for="avatar">Profile photo</label>

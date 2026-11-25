@@ -137,6 +137,7 @@ document.querySelectorAll('[data-image-preview]').forEach((input) => {
         const file = input.files?.[0];
         if (!preview || !file) return;
 
+        const placeholder = preview.closest('[data-image-preview-frame]')?.querySelector('[data-image-placeholder]');
         const removeInputSelector = input.dataset.imageRemoveInput;
         if (removeInputSelector) {
             const removeInput = document.querySelector(removeInputSelector);
@@ -145,6 +146,7 @@ document.querySelectorAll('[data-image-preview]').forEach((input) => {
 
         preview.src = URL.createObjectURL(file);
         preview.hidden = false;
+        if (placeholder) placeholder.hidden = true;
     });
 });
 
@@ -152,17 +154,20 @@ document.querySelectorAll('[data-image-remove]').forEach((input) => {
     const preview = document.querySelector(input.dataset.imageRemove);
     const fileInput = document.querySelector(input.dataset.imageFile);
     if (!preview) return;
+    const placeholder = preview.closest('[data-image-preview-frame]')?.querySelector('[data-image-placeholder]');
 
     input.addEventListener('change', () => {
         if (input.checked) {
             if (fileInput) fileInput.value = '';
             preview.hidden = true;
+            if (placeholder) placeholder.hidden = false;
             return;
         }
 
         if (preview.dataset.originalSrc) {
             preview.src = preview.dataset.originalSrc;
             preview.hidden = false;
+            if (placeholder) placeholder.hidden = true;
         }
     });
 });
@@ -172,10 +177,20 @@ document.querySelectorAll('[data-image-gallery]').forEach((input) => {
         const gallery = document.querySelector(input.dataset.imageGallery);
         if (!gallery) return;
 
-        gallery.replaceChildren();
-        [...(input.files || [])].forEach((file) => {
+        const placeholder = gallery.querySelector('[data-gallery-placeholder]');
+        gallery.querySelectorAll('img[data-gallery-preview-image]').forEach((image) => image.remove());
+        const files = [...(input.files || [])];
+
+        if (!files.length) {
+            if (placeholder) placeholder.hidden = false;
+            return;
+        }
+
+        if (placeholder) placeholder.hidden = true;
+        files.forEach((file) => {
             const image = document.createElement('img');
             image.className = 'banner-upload-preview-image';
+            image.dataset.galleryPreviewImage = 'true';
             image.src = URL.createObjectURL(file);
             image.alt = file.name;
             gallery.append(image);
