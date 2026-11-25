@@ -73,8 +73,10 @@ class BookstoreAdminTest extends TestCase
         $this->put(route('admin.settings.update'), [
             'name' => $admin->name,
             'email' => $admin->email,
+            'current_password' => 'incorrect-autofilled-password',
             'avatar' => $this->fakePng('profile.png'),
-        ])->assertRedirect(route('admin.settings.edit'));
+        ])->assertRedirect(route('admin.settings.edit'))
+            ->assertSessionHas('success');
 
         $firstAvatarPath = $admin->fresh()->avatar_path;
         $this->assertNotNull($firstAvatarPath);
@@ -122,6 +124,27 @@ class BookstoreAdminTest extends TestCase
 
         $this->assertNull($admin->fresh()->avatar_path);
         Storage::disk('public')->assertDirectoryEmpty('avatars');
+    }
+
+    public function test_profile_password_change_still_requires_the_correct_current_password(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $originalPasswordHash = $admin->password;
+        $this->actingAs($admin);
+
+        $this->from(route('admin.settings.edit'))
+            ->put(route('admin.settings.update'), [
+                'name' => $admin->name,
+                'email' => $admin->email,
+                'current_password' => 'incorrect-current-password',
+                'password' => 'new-secure-password-123',
+                'password_confirmation' => 'new-secure-password-123',
+            ])
+            ->assertSessionHasErrors([
+                'current_password' => 'The password is incorrect.',
+            ]);
+
+        $this->assertSame($originalPasswordHash, $admin->fresh()->password);
     }
 
     public function test_administrators_can_save_and_update_the_single_contact_page_record(): void
