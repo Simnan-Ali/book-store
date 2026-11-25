@@ -29,8 +29,10 @@
 
             <div class="sidebar-label sidebar-label--lower">WEBSITE</div>
             <nav class="sidebar-nav" aria-label="Website management">
+                <a href="{{ route('admin.banners.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.banners.*')])><x-icon name="banner"/><span>Banner Management</span></a>
                 <a href="{{ route('admin.menus.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.menus.*')])><x-icon name="menu"/><span>Menu Master</span></a>
                 <a href="{{ route('admin.contact-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.contact-page-settings.*')])><x-icon name="contact"/><span>Contact Us Page Master</span></a>
+                <a href="{{ route('admin.about-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.about-page-settings.*')])><x-icon name="about"/><span>About Us Page Master</span></a>
             </nav>
 
             <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>

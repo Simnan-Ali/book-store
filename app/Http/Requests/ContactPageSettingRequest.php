@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\ContactPageSetting;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ContactPageSettingRequest extends FormRequest
@@ -25,6 +27,24 @@ class ContactPageSettingRequest extends FormRequest
             'whatsapp_number' => ['nullable', 'string', 'max:50'],
             'office_address' => ['nullable', 'string', 'max:5000'],
             'google_maps_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'map_location_name' => ['nullable', 'string', 'max:255'],
+            'google_maps_embed_url' => [
+                'nullable',
+                'string',
+                'max:2048',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if (
+                        is_string($value)
+                        && trim($value) !== ''
+                        && ! ContactPageSetting::isSafeGoogleMapsEmbedUrl($value)
+                    ) {
+                        $fail('Use a valid HTTPS Google Maps embed URL from www.google.com/maps/embed.');
+                    }
+                },
+            ],
+            'map_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'map_longitude' => ['nullable', 'numeric', 'between:-180,180'],
+            'show_map' => ['sometimes', 'boolean'],
             'business_hours' => ['nullable', 'string', 'max:5000'],
             'working_days' => ['nullable', 'string', 'max:255'],
             'additional_information' => ['nullable', 'string', 'max:5000'],

@@ -16,8 +16,11 @@ class ContactPageSettingController extends Controller
 {
     public function edit(): View
     {
+        $settings = ContactPageSetting::singleton();
+
         return view('admin.contact-page-settings.edit', [
-            'settings' => ContactPageSetting::singleton(),
+            'settings' => $settings,
+            'safeMapEmbedUrl' => $settings->safeGoogleMapsEmbedUrl(),
         ]);
     }
 

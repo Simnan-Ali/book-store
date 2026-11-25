@@ -75,7 +75,68 @@
                 </section>
 
                 <section class="form-section">
-                    <div class="form-section-heading"><span class="form-section-number">03</span><div><h2>Business information</h2><p>Share when and how your team is available.</p></div></div>
+                    <div class="form-section-heading"><span class="form-section-number">03</span><div><h2>Google Maps Location</h2><p>Configure a safe map preview for your future Contact Us page.</p></div></div>
+                    <div class="form-grid">
+                        <div class="field {{ $errors->has('map_location_name') ? 'field-has-error' : '' }}">
+                            <label class="field-label" for="map_location_name">Location name</label>
+                            <input class="form-input" id="map_location_name" name="map_location_name" value="{{ old('map_location_name', $settings->map_location_name) }}" maxlength="255" placeholder="Folio Books - Downtown">
+                            @error('map_location_name')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field {{ $errors->has('google_maps_embed_url') ? 'field-has-error' : '' }}">
+                            <label class="field-label" for="google_maps_embed_url">Google Maps embed URL</label>
+                            <input class="form-input" id="google_maps_embed_url" name="google_maps_embed_url" type="url" value="{{ old('google_maps_embed_url', $settings->google_maps_embed_url) }}" maxlength="2048" placeholder="https://www.google.com/maps/embed?pb=...">
+                            <p class="field-hint">Paste the HTTPS embed URL from Google Maps. No API key is needed.</p>
+                            @error('google_maps_embed_url')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field {{ $errors->has('map_latitude') ? 'field-has-error' : '' }}">
+                            <label class="field-label" for="map_latitude">Latitude <span>(optional)</span></label>
+                            <input class="form-input" id="map_latitude" name="map_latitude" type="number" step="any" min="-90" max="90" value="{{ old('map_latitude', $settings->map_latitude) }}" placeholder="45.5231">
+                            @error('map_latitude')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field {{ $errors->has('map_longitude') ? 'field-has-error' : '' }}">
+                            <label class="field-label" for="map_longitude">Longitude <span>(optional)</span></label>
+                            <input class="form-input" id="map_longitude" name="map_longitude" type="number" step="any" min="-180" max="180" value="{{ old('map_longitude', $settings->map_longitude) }}" placeholder="-122.6765">
+                            @error('map_longitude')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field field--full">
+                            <label class="form-check">
+                                <input type="hidden" name="show_map" value="0">
+                                <input type="checkbox" name="show_map" value="1" @checked((bool) old('show_map', $settings->show_map))>
+                                <span class="form-check-copy">Show map<small>Enable the map for future use on the public Contact Us page.</small></span>
+                            </label>
+                            @error('show_map')<p class="field-error">{{ $message }}</p>@enderror
+                        </div>
+                        <div class="field field--full">
+                            <label class="field-label" for="map-preview">Map preview</label>
+                            <div
+                                id="map-preview"
+                                class="google-map-preview"
+                                data-google-map-preview
+                                data-map-url-input="#google_maps_embed_url"
+                                data-location-name-input="#map_location_name"
+                            >
+                                <div class="google-map-preview-empty" data-map-empty @if ($safeMapEmbedUrl) hidden @endif>
+                                    <span class="google-map-preview-icon"><x-icon name="map"/></span>
+                                    <strong>No map preview yet</strong>
+                                    <p>Enter a valid Google Maps embed URL above to preview the location.</p>
+                                </div>
+                                <div class="google-map-preview-frame" data-map-frame @if (! $safeMapEmbedUrl) hidden @endif>
+                                    <iframe
+                                        @if ($safeMapEmbedUrl) src="{{ $safeMapEmbedUrl }}" @endif
+                                        title="{{ $settings->map_location_name ?: 'Google Maps location preview' }}"
+                                        sandbox="allow-scripts allow-same-origin allow-popups"
+                                        referrerpolicy="strict-origin-when-cross-origin"
+                                        loading="lazy"
+                                        allowfullscreen
+                                    ></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading"><span class="form-section-number">04</span><div><h2>Business information</h2><p>Share when and how your team is available.</p></div></div>
                     <div class="form-grid">
                         <div class="field {{ $errors->has('working_days') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="working_days">Working days</label>
@@ -96,7 +157,7 @@
                 </section>
 
                 <section class="form-section">
-                    <div class="form-section-heading"><span class="form-section-number">04</span><div><h2>Social media links</h2><p>Add the bookstore's official social profiles.</p></div></div>
+                    <div class="form-section-heading"><span class="form-section-number">05</span><div><h2>Social media links</h2><p>Add the bookstore's official social profiles.</p></div></div>
                     <div class="form-grid">
                         <div class="field {{ $errors->has('facebook_url') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="facebook_url">Facebook URL</label>
@@ -122,7 +183,7 @@
                 </section>
 
                 <section class="form-section">
-                    <div class="form-section-heading"><span class="form-section-number">05</span><div><h2>Contact form content</h2><p>Prepare the wording for a future website contact form.</p></div></div>
+                    <div class="form-section-heading"><span class="form-section-number">06</span><div><h2>Contact form content</h2><p>Prepare the wording for a future website contact form.</p></div></div>
                     <div class="form-grid">
                         <div class="field field--full {{ $errors->has('contact_form_heading') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="contact_form_heading">Contact form heading <span class="required-mark">*</span></label>
@@ -148,7 +209,7 @@
                 </section>
 
                 <section class="form-section">
-                    <div class="form-section-heading"><span class="form-section-number">06</span><div><h2>SEO information</h2><p>Optional metadata to prepare the page for search engines.</p></div></div>
+                    <div class="form-section-heading"><span class="form-section-number">07</span><div><h2>SEO information</h2><p>Optional metadata to prepare the page for search engines.</p></div></div>
                     <div class="form-grid">
                         <div class="field field--full {{ $errors->has('meta_title') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="meta_title">Meta title</label>

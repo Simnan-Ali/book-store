@@ -17,6 +17,11 @@ use Illuminate\Database\Eloquent\Model;
     'whatsapp_number',
     'office_address',
     'google_maps_url',
+    'map_location_name',
+    'google_maps_embed_url',
+    'map_latitude',
+    'map_longitude',
+    'show_map',
     'business_hours',
     'working_days',
     'additional_information',
@@ -38,6 +43,19 @@ class ContactPageSetting extends Model
 
     public $incrementing = false;
 
+    protected $attributes = [
+        'show_map' => true,
+    ];
+
+    protected function casts(): array
+    {
+        return [
+            'map_latitude' => 'decimal:7',
+            'map_longitude' => 'decimal:7',
+            'show_map' => 'boolean',
+        ];
+    }
+
     public static function singleton(): self
     {
         $settings = static::query()->find(self::SINGLETON_ID);
@@ -50,5 +68,37 @@ class ContactPageSetting extends Model
         $settings->setAttribute($settings->getKeyName(), self::SINGLETON_ID);
 
         return $settings;
+    }
+
+    public static function isSafeGoogleMapsEmbedUrl(?string $url): bool
+    {
+        if ($url === null || trim($url) === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+            return false;
+        }
+
+        $components = parse_url($url);
+
+        if (! is_array($components)) {
+            return false;
+        }
+
+        $path = $components['path'] ?? '';
+        $isEmbedPath = $path === '/maps/embed' || str_starts_with($path, '/maps/embed/');
+
+        return strtolower($components['scheme'] ?? '') === 'https'
+            && strtolower($components['host'] ?? '') === 'www.google.com'
+            && $isEmbedPath
+            && isset($components['query'])
+            && $components['query'] !== ''
+            && ! isset($components['user'])
+            && ! isset($components['pass'])
+            && (! isset($components['port']) || $components['port'] === 443);
+    }
+
+    public function safeGoogleMapsEmbedUrl(): ?string
+    {
+        $url = $this->google_maps_embed_url;
+
+        return self::isSafeGoogleMapsEmbedUrl($url) ? $url : null;
     }
 }

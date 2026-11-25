@@ -71,6 +71,52 @@ document.querySelectorAll('[data-toast]').forEach((toast) => {
     window.setTimeout(dismiss, 5200);
 });
 
+const isSafeGoogleMapsEmbedUrl = (value) => {
+    try {
+        const url = new URL(value);
+        const isEmbedPath = url.pathname === '/maps/embed' || url.pathname.startsWith('/maps/embed/');
+
+        return url.protocol === 'https:'
+            && url.hostname.toLowerCase() === 'www.google.com'
+            && isEmbedPath
+            && url.search.length > 1
+            && url.username === ''
+            && url.password === ''
+            && (url.port === '' || url.port === '443');
+    } catch {
+        return false;
+    }
+};
+
+document.querySelectorAll('[data-google-map-preview]').forEach((preview) => {
+    const urlInput = document.querySelector(preview.dataset.mapUrlInput);
+    const locationNameInput = document.querySelector(preview.dataset.locationNameInput);
+    const emptyState = preview.querySelector('[data-map-empty]');
+    const frameContainer = preview.querySelector('[data-map-frame]');
+    const frame = frameContainer?.querySelector('iframe');
+
+    if (!urlInput || !emptyState || !frameContainer || !frame) return;
+
+    const updatePreview = () => {
+        const embedUrl = urlInput.value.trim();
+        const isSafeUrl = isSafeGoogleMapsEmbedUrl(embedUrl);
+
+        emptyState.hidden = isSafeUrl;
+        frameContainer.hidden = !isSafeUrl;
+
+        if (isSafeUrl) {
+            frame.src = embedUrl;
+            frame.title = locationNameInput?.value.trim() || 'Google Maps location preview';
+        } else {
+            frame.removeAttribute('src');
+        }
+    };
+
+    urlInput.addEventListener('input', updatePreview);
+    locationNameInput?.addEventListener('input', updatePreview);
+    updatePreview();
+});
+
 document.querySelectorAll('[data-image-preview]').forEach((input) => {
     input.addEventListener('change', () => {
         const preview = document.querySelector(input.dataset.imagePreview);
@@ -115,11 +161,52 @@ document.querySelectorAll('[data-image-gallery]').forEach((input) => {
         gallery.replaceChildren();
         [...(input.files || [])].forEach((file) => {
             const image = document.createElement('img');
-            image.className = 'existing-image';
+            image.className = 'banner-upload-preview-image';
             image.src = URL.createObjectURL(file);
             image.alt = file.name;
             gallery.append(image);
         });
+    });
+});
+
+document.querySelectorAll('[data-dropzone]').forEach((dropzone) => {
+    const input = dropzone.querySelector('input[type="file"]');
+    if (!input) return;
+
+    ['dragenter', 'dragover'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropzone.classList.add('is-dragging');
+        });
+    });
+
+    ['dragleave', 'dragend'].forEach((eventName) => {
+        dropzone.addEventListener(eventName, () => dropzone.classList.remove('is-dragging'));
+    });
+
+    dropzone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropzone.classList.remove('is-dragging');
+
+        const files = [...(event.dataTransfer?.files || [])];
+        const transfer = new DataTransfer();
+        (input.multiple ? files : files.slice(0, 1)).forEach((file) => transfer.items.add(file));
+        input.files = transfer.files;
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+});
+
+document.querySelectorAll('[data-slug-source]').forEach((source) => {
+    const target = document.querySelector(source.dataset.slugSource);
+    if (!target) return;
+
+    source.addEventListener('input', () => {
+        target.value = source.value
+            .toLowerCase()
+            .normalize('NFKD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '') || 'banner';
     });
 });
 
