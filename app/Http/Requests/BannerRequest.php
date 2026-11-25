@@ -13,7 +13,7 @@ class BannerRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('banner') ? 'banners.edit' : 'banners.create');
     }
 
     protected function prepareForValidation(): void

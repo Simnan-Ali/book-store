@@ -6,6 +6,7 @@ use App\Models\Brand;
 use App\Models\Category;
 use App\Models\ContactPageSetting;
 use App\Models\Product;
+use App\Models\Role;
 use App\Models\Subcategory;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -45,6 +46,16 @@ class BookstoreAdminTest extends TestCase
         $this->assertAuthenticatedAs($admin);
         $this->post(route('admin.logout'))->assertRedirect(route('login'));
         $this->assertGuest();
+    }
+
+    public function test_dashboard_greeting_uses_the_configured_local_timezone(): void
+    {
+        $this->travelTo(new \DateTimeImmutable('2025-11-25T07:00:00+00:00'));
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('Good afternoon');
     }
 
     public function test_administrators_can_upload_replace_and_remove_their_profile_photo(): void
@@ -135,29 +146,29 @@ class BookstoreAdminTest extends TestCase
         $this->assertDatabaseHas('contact_page_settings', $payload + ['id' => ContactPageSetting::SINGLETON_ID]);
 
         $updatedPayload = $this->contactPagePayload([
-            'page_title' => 'Visit Folio Books',
+            'page_title' => 'Visit book-store',
             'page_subtitle' => 'Our team is ready to help',
             'main_heading' => 'Come say hello',
             'description' => 'Updated page introduction.',
-            'contact_email' => 'support@folio.example',
+            'contact_email' => 'support@book-store.example',
             'contact_phone' => '+1 555 222 3344',
             'whatsapp_number' => '+1 555 777 8899',
             'office_address' => '42 Reading Lane, Portland',
-            'google_maps_url' => 'https://maps.example/folio-updated',
+            'google_maps_url' => 'https://maps.example/book-store-updated',
             'business_hours' => '10:00 AM to 6:00 PM',
             'working_days' => 'Tuesday to Saturday',
             'additional_information' => 'Updated visitor information.',
-            'facebook_url' => 'https://facebook.example/folio-updated',
-            'instagram_url' => 'https://instagram.example/folio-updated',
-            'linkedin_url' => 'https://linkedin.example/folio-updated',
-            'youtube_url' => 'https://youtube.example/folio-updated',
+            'facebook_url' => 'https://facebook.example/book-store-updated',
+            'instagram_url' => 'https://instagram.example/book-store-updated',
+            'linkedin_url' => 'https://linkedin.example/book-store-updated',
+            'youtube_url' => 'https://youtube.example/book-store-updated',
             'contact_form_heading' => 'Write to our team',
             'contact_form_description' => 'Updated form introduction.',
-            'submit_button_text' => 'Send to Folio',
+            'submit_button_text' => 'Send to book-store',
             'success_message' => 'Your message is on its way.',
-            'meta_title' => 'Visit Folio Books',
+            'meta_title' => 'Visit book-store',
             'meta_description' => 'Updated search description.',
-            'meta_keywords' => 'books, folio, contact',
+            'meta_keywords' => 'books, book-store, contact',
         ]);
 
         $this->put(route('admin.contact-page-settings.update'), $updatedPayload + ['id' => 99])
@@ -173,7 +184,7 @@ class BookstoreAdminTest extends TestCase
         ]);
         $this->get(route('admin.contact-page-settings.edit'))
             ->assertOk()
-            ->assertSee('support@folio.example')
+            ->assertSee('support@book-store.example')
             ->assertSee('Come say hello');
     }
 
@@ -415,6 +426,117 @@ class BookstoreAdminTest extends TestCase
         Storage::disk('public')->assertMissing($coverPath);
     }
 
+    public function test_administrators_can_assign_or_leave_a_book_unassigned_to_a_vendor(): void
+    {
+        $this->actingAs($this->admin());
+        $vendorRole = Role::create([
+            'name' => 'vendor',
+            'guard_name' => 'web',
+            'display_name' => 'Vendor',
+            'is_active' => true,
+            'is_protected' => false,
+        ]);
+        $vendor = User::factory()->create(['name' => 'Page Turner']);
+        $vendor->assignRole($vendorRole);
+        $category = Category::create(['name' => 'Poetry', 'slug' => 'poetry', 'is_active' => true]);
+        $brand = Brand::create(['name' => 'Verse House', 'slug' => 'verse-house', 'is_active' => true]);
+        $payload = $this->productPayload($category, $brand);
+        $payload['vendor_id'] = $vendor->getKey();
+
+        $this->get(route('admin.products.create'))
+            ->assertOk()
+            ->assertSee('name="vendor_id"', false)
+            ->assertSee($vendor->email);
+
+        $this->post(route('admin.products.store'), $payload)
+            ->assertRedirect(route('admin.products.index'));
+
+        $product = Product::query()->where('sku', $payload['sku'])->firstOrFail();
+        $this->assertDatabaseHas('products', [
+            'id' => $product->getKey(),
+            'vendor_id' => $vendor->getKey(),
+        ]);
+        $this->get(route('admin.products.index'))
+            ->assertOk()
+            ->assertSee('Page Turner');
+        $this->get(route('admin.products.show', $product))
+            ->assertOk()
+            ->assertSee('Page Turner');
+
+        $this->get(route('admin.products.edit', $product))
+            ->assertOk()
+            ->assertSee('value="'.$vendor->getKey().'" selected', false);
+
+        $this->put(route('admin.products.update', $product), array_merge($payload, ['vendor_id' => '']))
+            ->assertRedirect(route('admin.products.index'));
+
+        $this->assertDatabaseHas('products', [
+            'id' => $product->getKey(),
+            'vendor_id' => null,
+        ]);
+
+        $unassignedPayload = array_merge($payload, [
+            'title' => 'The Quiet Atlas Unassigned',
+            'isbn' => '9780000000002',
+            'sku' => 'BK-QUIET-02',
+            'vendor_id' => '',
+        ]);
+
+        $this->post(route('admin.products.store'), $unassignedPayload)
+            ->assertRedirect(route('admin.products.index'));
+
+        $this->assertDatabaseHas('products', [
+            'sku' => $unassignedPayload['sku'],
+            'vendor_id' => null,
+        ]);
+    }
+
+    public function test_non_vendor_accounts_cannot_be_assigned_to_a_book(): void
+    {
+        $this->actingAs($this->admin());
+        $ordinaryUser = User::factory()->create();
+        $category = Category::create(['name' => 'Poetry', 'slug' => 'poetry', 'is_active' => true]);
+        $brand = Brand::create(['name' => 'Verse House', 'slug' => 'verse-house', 'is_active' => true]);
+        $payload = array_merge($this->productPayload($category, $brand), [
+            'vendor_id' => $ordinaryUser->getKey(),
+        ]);
+
+        $this->from(route('admin.products.create'))
+            ->post(route('admin.products.store'), $payload)
+            ->assertSessionHasErrors([
+                'vendor_id' => 'The selected vendor must be an active user with the Vendor role.',
+            ]);
+
+        $this->assertDatabaseMissing('products', ['sku' => $payload['sku']]);
+    }
+
+    public function test_inactive_vendor_accounts_cannot_be_assigned_to_a_book(): void
+    {
+        $this->actingAs($this->admin());
+        $vendorRole = Role::create([
+            'name' => 'vendor',
+            'guard_name' => 'web',
+            'display_name' => 'Vendor',
+            'is_active' => false,
+            'is_protected' => false,
+        ]);
+        $inactiveVendor = User::factory()->create();
+        $inactiveVendor->assignRole($vendorRole);
+        $category = Category::create(['name' => 'Poetry', 'slug' => 'poetry', 'is_active' => true]);
+        $brand = Brand::create(['name' => 'Verse House', 'slug' => 'verse-house', 'is_active' => true]);
+        $payload = array_merge($this->productPayload($category, $brand), [
+            'vendor_id' => $inactiveVendor->getKey(),
+        ]);
+
+        $this->from(route('admin.products.create'))
+            ->post(route('admin.products.store'), $payload)
+            ->assertSessionHasErrors([
+                'vendor_id' => 'The selected vendor must be an active user with the Vendor role.',
+            ]);
+
+        $this->assertDatabaseMissing('products', ['sku' => $payload['sku']]);
+    }
+
     private function admin(): User
     {
         return User::factory()->create(['is_admin' => true]);
@@ -423,30 +545,30 @@ class BookstoreAdminTest extends TestCase
     private function contactPagePayload(array $overrides = []): array
     {
         return array_merge([
-            'page_title' => 'Contact Folio Books',
+            'page_title' => 'Contact book-store',
             'page_subtitle' => 'We are here to help',
             'main_heading' => 'We would love to hear from you',
-            'description' => 'Get in touch with the Folio Books team.',
-            'banner_alt_text' => 'Folio Books storefront',
-            'contact_email' => 'hello@folio.example',
+            'description' => 'Get in touch with the book-store team.',
+            'banner_alt_text' => 'book-store storefront',
+            'contact_email' => 'hello@book-store.example',
             'contact_phone' => '+1 555 123 4567',
             'whatsapp_number' => '+1 555 987 6543',
             'office_address' => '10 Book Street, Portland',
-            'google_maps_url' => 'https://maps.example/folio',
+            'google_maps_url' => 'https://maps.example/book-store',
             'business_hours' => '9:00 AM to 5:00 PM',
             'working_days' => 'Monday to Friday',
             'additional_information' => 'Call ahead for special appointments.',
-            'facebook_url' => 'https://facebook.example/folio',
-            'instagram_url' => 'https://instagram.example/folio',
-            'linkedin_url' => 'https://linkedin.example/folio',
-            'youtube_url' => 'https://youtube.example/folio',
+            'facebook_url' => 'https://facebook.example/book-store',
+            'instagram_url' => 'https://instagram.example/book-store',
+            'linkedin_url' => 'https://linkedin.example/book-store',
+            'youtube_url' => 'https://youtube.example/book-store',
             'contact_form_heading' => 'Send us a message',
             'contact_form_description' => 'We will reply as soon as possible.',
             'submit_button_text' => 'Send message',
             'success_message' => 'Thank you. We will be in touch soon.',
-            'meta_title' => 'Contact Folio Books',
-            'meta_description' => 'Contact the Folio Books team.',
-            'meta_keywords' => 'bookstore, contact, Folio Books',
+            'meta_title' => 'Contact book-store',
+            'meta_description' => 'Contact the book-store team.',
+            'meta_keywords' => 'bookstore, contact, book-store',
         ], $overrides);
     }
 

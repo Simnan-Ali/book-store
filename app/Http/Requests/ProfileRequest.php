@@ -9,7 +9,7 @@ class ProfileRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can('profile.edit');
     }
 
     public function rules(): array

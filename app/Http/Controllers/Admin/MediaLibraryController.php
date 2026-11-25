@@ -12,7 +12,12 @@ class MediaLibraryController extends Controller
 {
     public function __invoke(): View
     {
+        $user = auth()->user();
+        $isVendor = ! $user->isSuperAdmin() && $user->hasActiveRole('vendor');
+        $vendorId = $user->getKey();
+
         $covers = Product::whereNotNull('main_image')
+            ->when($isVendor, fn ($query) => $query->where('vendor_id', $vendorId))
             ->latest()
             ->get(['id', 'title', 'main_image', 'created_at'])
             ->map(fn (Product $product) => [
@@ -24,6 +29,7 @@ class MediaLibraryController extends Controller
             ]);
 
         $gallery = ProductImage::with('product:id,title')
+            ->when($isVendor, fn ($query) => $query->whereHas('product', fn ($query) => $query->where('vendor_id', $vendorId)))
             ->latest('id')
             ->get()
             ->map(fn (ProductImage $image) => [

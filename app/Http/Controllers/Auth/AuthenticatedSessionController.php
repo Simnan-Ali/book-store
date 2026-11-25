@@ -25,7 +25,7 @@ class AuthenticatedSessionController extends Controller
             'password' => ['required', 'string'],
         ]);
 
-        if (! Auth::attempt($credentials, $request->boolean('remember')) || ! $request->user()?->is_admin) {
+        if (! Auth::attempt($credentials, $request->boolean('remember')) || ! $request->user()?->hasAdminPortalAccess()) {
             Auth::logout();
 
             throw ValidationException::withMessages([

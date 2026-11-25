@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Product;
+use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -9,7 +11,7 @@ class ProductRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('product') ? 'books.edit' : 'books.create');
     }
 
     public function rules(): array
@@ -31,6 +33,27 @@ class ProductRequest extends FormRequest
                     ->whereNull('deleted_at'),
             ],
             'brand_id' => ['required', 'integer', Rule::exists('brands', 'id')->whereNull('deleted_at')],
+            'vendor_id' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, \Closure $fail) use ($product): void {
+                    if ($product instanceof Product && (string) $product->vendor_id === (string) $value) {
+                        return;
+                    }
+
+                    $isActiveVendor = User::query()
+                        ->whereKey($value)
+                        ->whereHas('roles', fn ($query) => $query
+                            ->where('roles.name', 'vendor')
+                            ->where('roles.guard_name', 'web')
+                            ->where('roles.is_active', true))
+                        ->exists();
+
+                    if (! $isActiveVendor) {
+                        $fail('The selected vendor must be an active user with the Vendor role.');
+                    }
+                },
+            ],
             'author' => ['required', 'string', 'max:255'],
             'language' => ['nullable', 'string', 'max:100'],
             'edition' => ['nullable', 'string', 'max:100'],

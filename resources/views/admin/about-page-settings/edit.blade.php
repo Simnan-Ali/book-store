@@ -18,6 +18,7 @@
     <form method="POST" action="{{ route('admin.about-page-settings.update') }}" enctype="multipart/form-data" data-loading>
         @csrf
         @method('PUT')
+        @cannot('about-page.edit')<fieldset disabled>@endcannot
 
         <div class="form-layout">
             <div class="panel form-panel">
@@ -37,7 +38,7 @@
                         </div>
                         <div class="field {{ $errors->has('heading') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="heading">Main heading <span class="required-mark">*</span></label>
-                            <input class="form-input" id="heading" name="heading" value="{{ old('heading', $settings->heading) }}" maxlength="255" placeholder="A little about Folio Books" required>
+                            <input class="form-input" id="heading" name="heading" value="{{ old('heading', $settings->heading) }}" maxlength="255" placeholder="A little about book-store" required>
                             @error('heading')<p class="field-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="field field--full {{ $errors->has('description') ? 'field-has-error' : '' }}">
@@ -74,8 +75,7 @@
                 </section>
 
                 <div class="form-actions">
-                    <a class="button button-muted" href="{{ route('admin.dashboard') }}">Cancel</a>
-                    <button class="button button-primary" type="submit" data-loading-button>Save changes</button>
+                    @can('about-page.edit')<a class="button button-muted" href="{{ route('admin.dashboard') }}">Cancel</a><button class="button button-primary" type="submit" data-loading-button>Save changes</button>@endcan
                 </div>
             </div>
 
@@ -110,5 +110,6 @@
                 </section>
             </aside>
         </div>
+        @cannot('about-page.edit')</fieldset>@endcannot
     </form>
 @endsection

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Overview') &middot; Folio Books</title>
+    <title>@yield('title', 'Overview') &middot; book-store</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="admin-body">
@@ -13,32 +13,45 @@
         <aside class="admin-sidebar" id="admin-sidebar">
             <a href="{{ route('admin.dashboard') }}" class="brand-lockup">
                 <span class="brand-mark"><x-icon name="book-open" class="h-6 w-6"/></span>
-                <span><strong>folio</strong><small>BOOKS ADMIN</small></span>
+                <span><strong>book-store</strong><small>BOOKS ADMIN</small></span>
             </a>
 
             <div class="sidebar-label">WORKSPACE</div>
             <nav class="sidebar-nav" aria-label="Main navigation">
-                <a href="{{ route('admin.dashboard') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><x-icon name="dashboard"/><span>Overview</span></a>
-                <a href="{{ route('admin.categories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.categories.*')])><x-icon name="categories"/><span>Categories</span></a>
-                <a href="{{ route('admin.subcategories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.subcategories.*')])><x-icon name="layers"/><span>Subcategories</span></a>
-                <a href="{{ route('admin.brands.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.brands.*')])><x-icon name="publishers"/><span>Publishers</span></a>
-                <a href="{{ route('admin.products.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.products.*')])><x-icon name="books"/><span>Books</span></a>
-                <a href="{{ route('admin.inventory') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.inventory')])><x-icon name="inventory"/><span>Inventory</span></a>
-                <a href="{{ route('admin.media.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.media.*')])><x-icon name="media"/><span>Media library</span></a>
+                @can('dashboard.view')<a href="{{ route('admin.dashboard') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.dashboard')])><x-icon name="dashboard"/><span>Overview</span></a>@endcan
+                @can('categories.view')<a href="{{ route('admin.categories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.categories.*')])><x-icon name="categories"/><span>Categories</span></a>@endcan
+                @can('subcategories.view')<a href="{{ route('admin.subcategories.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.subcategories.*')])><x-icon name="layers"/><span>Subcategories</span></a>@endcan
+                @can('brands.view')<a href="{{ route('admin.brands.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.brands.*')])><x-icon name="publishers"/><span>Publishers</span></a>@endcan
+                @can('books.view')<a href="{{ route('admin.products.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.products.*')])><x-icon name="books"/><span>Books</span></a>@endcan
+                @can('inventory.view')<a href="{{ route('admin.inventory') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.inventory')])><x-icon name="inventory"/><span>Inventory</span></a>@endcan
+                @can('media.view')<a href="{{ route('admin.media.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.media.*')])><x-icon name="media"/><span>Media library</span></a>@endcan
             </nav>
 
-            <div class="sidebar-label sidebar-label--lower">WEBSITE</div>
-            <nav class="sidebar-nav" aria-label="Website management">
-                <a href="{{ route('admin.banners.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.banners.*')])><x-icon name="banner"/><span>Banner Management</span></a>
-                <a href="{{ route('admin.menus.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.menus.*')])><x-icon name="menu"/><span>Menu Master</span></a>
-                <a href="{{ route('admin.contact-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.contact-page-settings.*')])><x-icon name="contact"/><span>Contact Us Page Master</span></a>
-                <a href="{{ route('admin.about-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.about-page-settings.*')])><x-icon name="about"/><span>About Us Page Master</span></a>
-            </nav>
+            @if (auth()->user()->can('banners.view') || auth()->user()->can('menu-master.view') || auth()->user()->can('contact-page.view') || auth()->user()->can('about-page.view'))
+                <div class="sidebar-label sidebar-label--lower">WEBSITE</div>
+                <nav class="sidebar-nav" aria-label="Website management">
+                    @can('banners.view')<a href="{{ route('admin.banners.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.banners.*')])><x-icon name="banner"/><span>Banner Management</span></a>@endcan
+                    @can('menu-master.view')<a href="{{ route('admin.menus.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.menus.*')])><x-icon name="menu"/><span>Menu Master</span></a>@endcan
+                    @can('contact-page.view')<a href="{{ route('admin.contact-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.contact-page-settings.*')])><x-icon name="contact"/><span>Contact Us Page Master</span></a>@endcan
+                    @can('about-page.view')<a href="{{ route('admin.about-page-settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.about-page-settings.*')])><x-icon name="about"/><span>About Us Page Master</span></a>@endcan
+                </nav>
+            @endif
 
-            <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>
-            <nav class="sidebar-nav">
-                <a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="settings"/><span>My profile</span></a>
-            </nav>
+            @if (auth()->user()->can('roles.view') || auth()->user()->can('permissions.view') || auth()->user()->can('users.view'))
+                <div class="sidebar-label sidebar-label--lower">ACCESS CONTROL</div>
+                <nav class="sidebar-nav" aria-label="Access control">
+                    @can('roles.view')<a href="{{ route('admin.roles.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.roles.*')])><x-icon name="shield"/><span>Roles</span></a>@endcan
+                    @can('permissions.view')<a href="{{ route('admin.permissions.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.permissions.*')])><x-icon name="key"/><span>Permissions</span></a>@endcan
+                    @can('users.view')<a href="{{ route('admin.users.index') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.users.*')])><x-icon name="users"/><span>Admin users</span></a>@endcan
+                </nav>
+            @endif
+
+            @can('profile.view')
+                <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>
+                <nav class="sidebar-nav">
+                    <a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="settings"/><span>My profile</span></a>
+                </nav>
+            @endcan
 
             <div class="sidebar-bottom">
                 <div class="sidebar-note">
@@ -64,12 +77,11 @@
                     <details class="account-menu" data-account-menu>
                         <summary class="topbar-profile" aria-label="Open account menu">
                             <x-user-avatar :user="auth()->user()" class="avatar"/>
-                            <span class="topbar-user"><strong>{{ auth()->user()->name }}</strong><small>Administrator</small></span>
+                            <span class="topbar-user"><strong>{{ auth()->user()->name }}</strong><small>{{ auth()->user()->primaryRoleDisplayName() }}</small></span>
                             <span class="account-menu-caret" aria-hidden="true"></span>
                         </summary>
                         <div class="account-menu-panel">
-                            <a href="{{ route('admin.settings.edit') }}" class="account-menu-item"><x-icon name="user" class="h-4 w-4"/> My profile</a>
-                            <div class="account-menu-divider"></div>
+                            @can('profile.view')<a href="{{ route('admin.settings.edit') }}" class="account-menu-item"><x-icon name="user" class="h-4 w-4"/> My profile</a><div class="account-menu-divider"></div>@endcan
                             <form method="POST" action="{{ route('admin.logout') }}">
                                 @csrf
                                 <button class="account-menu-item account-menu-item--logout" type="submit"><x-icon name="logout" class="h-4 w-4"/> Sign out</button>
@@ -88,7 +100,7 @@
                 @endif
                 @yield('content')
             </main>
-            <footer class="page-footer"><span>&copy; {{ now()->year }} Folio Books</span><span>Made for the love of reading.</span></footer>
+            <footer class="page-footer"><span>&copy; {{ now()->year }} book-store</span><span>Made for the love of reading.</span></footer>
         </div>
     </div>
 

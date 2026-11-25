@@ -5,7 +5,7 @@
 @section('content')
     <div class="module-heading">
         <div><p class="eyebrow">FUTURE SITE NAVIGATION</p><h1>Menu Master</h1><p>Manage reusable menu links for the website from one place.</p></div>
-        <a href="{{ route('admin.menus.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New menu</a>
+        @can('menu-master.create')<a href="{{ route('admin.menus.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New menu</a>@endcan
     </div>
 
     <section class="panel filter-panel">
@@ -20,7 +20,7 @@
 
     <section class="panel table-panel">
         @if ($menus->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="menu"/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No menus found' : 'Start building your menu structure' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Add top-level menus and child links for the future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status']))<a href="{{ route('admin.menus.create') }}" class="button button-primary button-small">Create menu</a>@endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="menu"/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No menus found' : 'Start building your menu structure' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Add top-level menus and child links for the future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status'])) @can('menu-master.create')<a href="{{ route('admin.menus.create') }}" class="button button-primary button-small">Create menu</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table menu-table">
                 <thead><tr><th>Menu</th><th>URL</th><th>Parent menu</th><th>Order</th><th>Opens in</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
@@ -32,8 +32,8 @@
                             <td>{{ $menu->parent?->name ?? '—' }}</td>
                             <td>{{ $menu->sort_order }}</td>
                             <td>{{ $menu->open_in_new_tab ? 'New tab' : 'Same tab' }}</td>
-                            <td><form method="POST" action="{{ route('admin.menus.status', $menu) }}">@csrf @method('PATCH')<button class="menu-status-button" type="submit" aria-label="{{ $menu->is_active ? 'Deactivate' : 'Activate' }} {{ $menu->name }}"><span class="status-pill {{ $menu->is_active ? 'status-active' : 'status-inactive' }}">{{ $menu->is_active ? 'Active' : 'Inactive' }}</span></button></form></td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.menus.edit', $menu) }}" aria-label="Edit {{ $menu->name }}"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.menus.destroy', $menu) }}" data-confirm="{{ $menu->children_count ? 'Remove or move the child menus before deleting this menu.' : 'This menu will be permanently deleted.' }}">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $menu->name }}"><x-icon name="trash"/></button></form></div></td>
+                            <td>@can('menu-master.edit')<form method="POST" action="{{ route('admin.menus.status', $menu) }}">@csrf @method('PATCH')<button class="menu-status-button" type="submit" aria-label="{{ $menu->is_active ? 'Deactivate' : 'Activate' }} {{ $menu->name }}"><span class="status-pill {{ $menu->is_active ? 'status-active' : 'status-inactive' }}">{{ $menu->is_active ? 'Active' : 'Inactive' }}</span></button></form>@else<span class="status-pill {{ $menu->is_active ? 'status-active' : 'status-inactive' }}">{{ $menu->is_active ? 'Active' : 'Inactive' }}</span>@endcan</td>
+                            <td><div class="row-actions">@can('menu-master.edit')<a class="row-action" href="{{ route('admin.menus.edit', $menu) }}" aria-label="Edit {{ $menu->name }}"><x-icon name="edit"/></a>@endcan @can('menu-master.delete')<form method="POST" action="{{ route('admin.menus.destroy', $menu) }}" data-confirm="{{ $menu->children_count ? 'Remove or move the child menus before deleting this menu.' : 'This menu will be permanently deleted.' }}">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $menu->name }}"><x-icon name="trash"/></button></form>@endcan</div></td>
                         </tr>
                     @endforeach
                 </tbody>

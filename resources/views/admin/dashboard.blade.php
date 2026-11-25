@@ -4,15 +4,16 @@
 
 @section('content')
     <div class="page-heading">
-        <div><p class="eyebrow">YOUR STORE AT A GLANCE</p><h1>Good {{ now()->hour < 12 ? 'morning' : (now()->hour < 18 ? 'afternoon' : 'evening') }}, {{ explode(' ', auth()->user()->name)[0] }} <span class="heading-sparkle">*</span></h1><p class="page-subtitle">Here's what's happening across your bookstore today.</p></div>
-        <a href="{{ route('admin.products.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> Add a book</a>
+        @php($greetingHour = now(config('app.display_timezone'))->hour)
+        <div><p class="eyebrow">YOUR STORE AT A GLANCE</p><h1>Good {{ $greetingHour < 12 ? 'morning' : ($greetingHour < 18 ? 'afternoon' : 'evening') }}, {{ explode(' ', auth()->user()->name)[0] }} <span class="heading-sparkle">*</span></h1><p class="page-subtitle">Here's what's happening across your bookstore today.</p></div>
+        @can('books.create')<a href="{{ route('admin.products.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> Add a book</a>@endcan
     </div>
 
     <section class="stats-grid" aria-label="Store statistics">
         <article class="stat-card stat-card--accent">
             <div class="stat-card-top"><span class="stat-icon stat-icon--warm"><x-icon name="books"/></span><span class="stat-kicker">CATALOGUE</span></div>
             <div class="stat-value">{{ number_format($stats['books']) }}</div><div class="stat-label">Total books</div>
-            <a href="{{ route('admin.products.index') }}" class="stat-link">View catalogue <x-icon name="arrow" class="h-3 w-3"/></a>
+            @can('books.view')<a href="{{ route('admin.products.index') }}" class="stat-link">View catalogue <x-icon name="arrow" class="h-3 w-3"/></a>@endcan
         </article>
         <article class="stat-card">
             <div class="stat-card-top"><span class="stat-icon stat-icon--lavender"><x-icon name="categories"/></span><span class="stat-kicker">ORGANIZATION</span></div>
@@ -22,7 +23,7 @@
         <article class="stat-card">
             <div class="stat-card-top"><span class="stat-icon stat-icon--sage"><x-icon name="publishers"/></span><span class="stat-kicker">IMPRINTS</span></div>
             <div class="stat-value">{{ number_format($stats['brands']) }}</div><div class="stat-label">Publishers</div>
-            <a href="{{ route('admin.brands.index') }}" class="stat-link">Manage publishers <x-icon name="arrow" class="h-3 w-3"/></a>
+            @can('brands.view')<a href="{{ route('admin.brands.index') }}" class="stat-link">Manage publishers <x-icon name="arrow" class="h-3 w-3"/></a>@endcan
         </article>
         <article class="stat-card">
             <div class="stat-card-top"><span class="stat-icon stat-icon--blue"><x-icon name="trend"/></span><span class="stat-kicker">AVAILABILITY</span></div>
@@ -31,6 +32,7 @@
         </article>
     </section>
 
+    @can('inventory.view')
     <section class="inventory-banner">
         <div class="inventory-banner-copy">
             <span class="banner-icon"><x-icon name="inventory" class="h-5 w-5"/></span>
@@ -38,16 +40,18 @@
         </div>
         <a href="{{ route('admin.inventory') }}" class="button button-outline">Review inventory <x-icon name="arrow" class="h-4 w-4"/></a>
     </section>
+    @endcan
 
     <div class="dashboard-grid">
+        @can('books.view')
         <section class="panel">
             <div class="panel-heading"><div><p class="eyebrow">RECENTLY ADDED</p><h2>Fresh on the shelves</h2></div><a class="text-link" href="{{ route('admin.products.index') }}">All books <x-icon name="arrow" class="h-3 w-3"/></a></div>
             @if ($recentProducts->isEmpty())
-                <div class="empty-state empty-state--compact"><span class="empty-icon"><x-icon name="book-open" class="h-5 w-5"/></span><strong>Your shelves are waiting.</strong><p>Add your first book to start building your catalogue.</p><a class="text-link" href="{{ route('admin.products.create') }}">Add your first book <x-icon name="arrow" class="h-3 w-3"/></a></div>
+                <div class="empty-state empty-state--compact"><span class="empty-icon"><x-icon name="book-open" class="h-5 w-5"/></span><strong>Your shelves are waiting.</strong><p>Add your first book to start building your catalogue.</p>@can('books.create')<a class="text-link" href="{{ route('admin.products.create') }}">Add your first book <x-icon name="arrow" class="h-3 w-3"/></a>@endcan</div>
             @else
                 <div class="recent-list">
                     @foreach ($recentProducts as $product)
-                        <a href="{{ route('admin.products.edit', $product) }}" class="recent-book">
+                        <a href="{{ route(auth()->user()->can('books.edit') ? 'admin.products.edit' : 'admin.products.show', $product) }}" class="recent-book">
                             <span class="book-cover-thumb">
                                 @if ($product->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="" loading="lazy">@else<x-icon name="book-open" class="h-5 w-5"/>@endif
                             </span>
@@ -58,11 +62,13 @@
                 </div>
             @endif
         </section>
+        @endcan
 
+        @can('categories.view')
         <section class="panel">
             <div class="panel-heading"><div><p class="eyebrow">CATALOGUE MIX</p><h2>Books by category</h2></div><x-icon name="categories" class="panel-heading-icon"/></div>
             @if ($categorySummary->isEmpty())
-                <div class="empty-state empty-state--compact"><strong>No categories yet</strong><p>Create categories to see how your collection is organized.</p><a class="text-link" href="{{ route('admin.categories.create') }}">Create a category <x-icon name="arrow" class="h-3 w-3"/></a></div>
+                <div class="empty-state empty-state--compact"><strong>No categories yet</strong><p>Create categories to see how your collection is organized.</p>@can('categories.create')<a class="text-link" href="{{ route('admin.categories.create') }}">Create a category <x-icon name="arrow" class="h-3 w-3"/></a>@endcan</div>
             @else
                 @php($maxCategoryCount = max(1, (int) $categorySummary->max('products_count')))
                 <div class="category-bars">
@@ -72,6 +78,7 @@
                 </div>
             @endif
         </section>
+        @endcan
     </div>
 
     <section class="panel activity-panel">

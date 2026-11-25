@@ -231,9 +231,9 @@ class AboutPageSettingTest extends TestCase
     {
         return array_replace([
             'section_title' => 'Our story',
-            'heading' => 'Welcome to Folio Books',
+            'heading' => 'Welcome to book-store',
             'description' => 'A home for curious readers.',
-            'image_alt' => 'The Folio Books team',
+            'image_alt' => 'The book-store team',
             'button_text' => 'Read More',
             'button_link' => '/about-us',
             'open_new_tab' => 0,

@@ -5,7 +5,7 @@
 @section('content')
     <div class="module-heading">
         <div><p class="eyebrow">FUTURE SITE CONTENT</p><h1>Banner Management</h1><p>Manage campaign artwork and content for your future storefront.</p></div>
-        <a href="{{ route('admin.banners.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New banner</a>
+        @can('banners.create')<a href="{{ route('admin.banners.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New banner</a>@endcan
     </div>
 
     <section class="panel filter-panel">
@@ -21,7 +21,7 @@
 
     <section class="panel table-panel">
         @if ($banners->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="banner"/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No banners found' : 'Give your future storefront a little life' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Create a banner to manage campaign imagery and content for your future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status']))<a href="{{ route('admin.banners.create') }}" class="button button-primary button-small">Create your first banner</a>@endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="banner"/></span><strong>{{ request()->hasAny(['q', 'type', 'status']) ? 'No banners found' : 'Give your future storefront a little life' }}</strong><p>{{ request()->hasAny(['q', 'type', 'status']) ? 'Try another search or choose a different filter.' : 'Create a banner to manage campaign imagery and content for your future website.' }}</p>@if (! request()->hasAny(['q', 'type', 'status'])) @can('banners.create')<a href="{{ route('admin.banners.create') }}" class="button button-primary button-small">Create your first banner</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table banner-table">
                 <thead><tr><th>Banner</th><th>Type</th><th>Display order</th><th>Gallery</th><th>Status</th><th>Dates</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
@@ -32,10 +32,10 @@
                             <td><span class="banner-type-pill banner-type-{{ $banner->type }}">{{ ['main' => 'Main banner', 'promotional' => 'Promotional', 'other' => 'Other'][$banner->type] }}</span></td>
                             <td><span class="banner-order">{{ $banner->sort_order }}</span></td>
                             <td>{{ number_format($banner->images_count) }} {{ \Illuminate\Support\Str::plural('image', $banner->images_count) }}</td>
-                            <td><form method="POST" action="{{ route('admin.banners.status', $banner) }}">@csrf @method('PATCH')<button class="menu-status-button" type="submit" aria-label="{{ $banner->status === 'active' ? 'Deactivate' : 'Activate' }} {{ $banner->title }}"><span class="status-pill {{ $banner->status === 'active' ? 'status-active' : 'status-inactive' }}">{{ ucfirst($banner->status) }}</span></button></form></td>
+                            <td>@can('banners.edit')<form method="POST" action="{{ route('admin.banners.status', $banner) }}">@csrf @method('PATCH')<button class="menu-status-button" type="submit" aria-label="{{ $banner->status === 'active' ? 'Deactivate' : 'Activate' }} {{ $banner->title }}"><span class="status-pill {{ $banner->status === 'active' ? 'status-active' : 'status-inactive' }}">{{ ucfirst($banner->status) }}</span></button></form>@else<span class="status-pill {{ $banner->status === 'active' ? 'status-active' : 'status-inactive' }}">{{ ucfirst($banner->status) }}</span>@endcan</td>
                             <td><span class="table-primary">{{ $banner->start_date?->format('M j, Y') ?? 'No start date' }}</span><span class="table-secondary">{{ $banner->end_date?->format('M j, Y') ?? 'No end date' }}</span></td>
                             <td>{{ $banner->created_at->format('M j, Y') }}</td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.banners.edit', $banner) }}" aria-label="Edit {{ $banner->title }}"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.banners.destroy', $banner) }}" data-confirm="This will soft-delete the banner and remove all of its uploaded images.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $banner->title }}"><x-icon name="trash"/></button></form></div></td>
+                            <td><div class="row-actions">@can('banners.edit')<a class="row-action" href="{{ route('admin.banners.edit', $banner) }}" aria-label="Edit {{ $banner->title }}"><x-icon name="edit"/></a>@endcan @can('banners.delete')<form method="POST" action="{{ route('admin.banners.destroy', $banner) }}" data-confirm="This will soft-delete the banner and remove all of its uploaded images.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $banner->title }}"><x-icon name="trash"/></button></form>@endcan</div></td>
                         </tr>
                     @endforeach
                 </tbody>

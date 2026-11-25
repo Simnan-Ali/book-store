@@ -10,7 +10,7 @@ class ContactPageSettingRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can('contact-page.edit');
     }
 
     public function rules(): array

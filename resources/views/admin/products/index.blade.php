@@ -5,7 +5,7 @@
 @section('content')
     <div class="module-heading">
         <div><p class="eyebrow">{{ $isInventory ? 'A HEALTHY STOCKROOM' : 'YOUR BOOKSHOP CATALOGUE' }}</p><h1>{{ $isInventory ? 'Inventory' : 'Books' }}</h1><p>{{ $isInventory ? 'Keep an eye on availability and catch low stock early.' : 'Every title, carefully accounted for and ready to be discovered.' }}</p></div>
-        <a href="{{ route('admin.products.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> Add a book</a>
+        @can('books.create')<a href="{{ route('admin.products.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> Add a book</a>@endcan
     </div>
 
     <section class="panel filter-panel">
@@ -25,25 +25,34 @@
 
     <section class="panel table-panel">
         @if ($products->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="books"/></span><strong>{{ request()->query() ? 'No books match those filters' : 'Your catalogue starts here' }}</strong><p>{{ request()->query() ? 'Try a different title, stock status, or category.' : 'Add your first book and give your collection a home.' }}</p>@if (! request()->query())<a href="{{ route('admin.products.create') }}" class="button button-primary button-small">Add a book</a>@endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="books"/></span><strong>{{ request()->query() ? 'No books match those filters' : 'Your catalogue starts here' }}</strong><p>{{ request()->query() ? 'Try a different title, stock status, or category.' : 'Add your first book and give your collection a home.' }}</p>@if (! request()->query()) @can('books.create')<a href="{{ route('admin.products.create') }}" class="button button-primary button-small">Add a book</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table">
-                <thead><tr><th>Book</th><th>Category</th><th>Publisher</th><th>Price</th><th>Stock</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
+                <thead><tr><th>Book</th><th>Category</th><th>Publisher</th><th>Vendor</th><th>Price</th><th>Stock</th><th>Status</th><th class="text-right">Actions</th></tr></thead>
                 <tbody>
                     @foreach ($products as $product)
                         <tr>
                             <td><div class="table-item"><span class="table-thumbnail">@if ($product->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="" loading="lazy">@else<x-icon name="book-open"/>@endif</span><span><span class="table-primary">{{ $product->title }}</span><span class="table-secondary">{{ $product->author }} &middot; SKU {{ $product->sku }}</span></span></div></td>
                             <td><span class="table-primary">{{ $product->category->name }}</span>@if ($product->subcategory)<span class="table-secondary">{{ $product->subcategory->name }}</span>@endif</td>
                             <td>{{ $product->brand->name }}</td>
+                            <td>{{ $product->vendor?->name ?? 'Unassigned' }}</td>
                             <td><span class="table-primary">${{ number_format((float) $product->selling_price, 2) }}</span>@if ($product->discount_percentage)<span class="table-secondary">{{ $product->discount_percentage }}% off</span>@endif</td>
-                            <td><span class="table-primary">{{ number_format($product->stock_quantity) }} copies</span><span class="table-secondary">Alert at {{ $product->low_stock_alert }}</span></td>
+                            <td><span class="table-primary">{{ number_format($product->stock_quantity) }} copies</span><span class="table-secondary">Alert at {{ $product->low_stock_alert }}</span>
+                                @if ($isInventory && auth()->user()->can('inventory.update'))
+                                    <form method="POST" action="{{ route('admin.inventory.stock.update', $product) }}" class="inventory-inline-form">@csrf @method('PATCH')<label><span class="sr-only">Stock quantity for {{ $product->title }}</span><input class="form-input" type="number" min="0" max="2147483647" name="stock_quantity" value="{{ $product->stock_quantity }}" required></label><label><span class="sr-only">Low-stock alert for {{ $product->title }}</span><input class="form-input" type="number" min="0" max="2147483647" name="low_stock_alert" value="{{ $product->low_stock_alert }}" required></label><button class="button button-outline button-small" type="submit">Save stock</button></form>
+                                @endif
+                            </td>
                             <td>
                                 @if (! $product->is_active)<span class="status-pill status-inactive">Inactive</span>
                                 @elseif ($product->stock_quantity === 0)<span class="status-pill stock-out">Out of stock</span>
                                 @elseif ($product->isLowStock())<span class="status-pill stock-low">Low stock</span>
                                 @else<span class="status-pill stock-in">In stock</span>@endif
                             </td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.products.show', $product) }}" aria-label="View details for {{ $product->title }}" title="View details"><x-icon name="eye"/></a><a class="row-action" href="{{ route('admin.products.edit', $product) }}" aria-label="Edit {{ $product->title }}" title="Edit"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.products.destroy', $product) }}" data-confirm="This will remove the book and its uploaded images from your active catalogue.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $product->title }}" title="Delete"><x-icon name="trash"/></button></form></div></td>
+                            <td><div class="row-actions">
+                                @can('books.view')<a class="row-action" href="{{ route('admin.products.show', $product) }}" aria-label="View details for {{ $product->title }}" title="View details"><x-icon name="eye"/></a>@endcan
+                                @can('books.edit')<a class="row-action" href="{{ route('admin.products.edit', $product) }}" aria-label="Edit {{ $product->title }}" title="Edit"><x-icon name="edit"/></a>@endcan
+                                @can('books.delete')<form method="POST" action="{{ route('admin.products.destroy', $product) }}" data-confirm="This will remove the book and its uploaded images from your active catalogue.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $product->title }}" title="Delete"><x-icon name="trash"/></button></form>@endcan
+                            </div></td>
                         </tr>
                     @endforeach
                 </tbody>

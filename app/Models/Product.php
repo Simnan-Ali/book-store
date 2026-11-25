@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
     'title', 'slug', 'isbn', 'sku', 'short_description', 'description', 'category_id',
     'subcategory_id', 'brand_id', 'author', 'language', 'edition', 'published_at',
     'regular_price', 'selling_price', 'stock_quantity', 'low_stock_alert', 'main_image',
-    'pages', 'format', 'weight', 'is_featured', 'is_best_seller', 'is_active',
+    'pages', 'format', 'weight', 'is_featured', 'is_best_seller', 'is_active', 'vendor_id',
 ])]
 class Product extends Model
 {
@@ -44,6 +44,11 @@ class Product extends Model
     public function brand(): BelongsTo
     {
         return $this->belongsTo(Brand::class);
+    }
+
+    public function vendor(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'vendor_id');
     }
 
     public function images(): HasMany

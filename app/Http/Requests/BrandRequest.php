@@ -9,7 +9,7 @@ class BrandRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('brand') ? 'brands.edit' : 'brands.create');
     }
 
     public function rules(): array

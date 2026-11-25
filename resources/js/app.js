@@ -65,6 +65,20 @@ confirmDialog?.addEventListener('close', () => {
     pendingForm = null;
 });
 
+document.querySelectorAll('[data-permissions-toggle]').forEach((button) => {
+    button.addEventListener('click', () => {
+        const checkboxes = [...document.querySelectorAll('[data-permission-group]')]
+            .filter((checkbox) => checkbox.dataset.permissionGroup === button.dataset.permissionsToggle);
+        const shouldCheck = checkboxes.some((checkbox) => !checkbox.checked);
+
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = shouldCheck;
+        });
+
+        button.textContent = shouldCheck ? 'Deselect all' : 'Select all';
+    });
+});
+
 document.querySelectorAll('[data-toast]').forEach((toast) => {
     const dismiss = () => toast.remove();
     toast.querySelector('[data-toast-close]')?.addEventListener('click', dismiss);

@@ -9,7 +9,7 @@ class CategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('category') ? 'categories.edit' : 'categories.create');
     }
 
     public function rules(): array

@@ -11,7 +11,7 @@
         </div>
         <div class="module-actions product-detail-actions">
             <a href="{{ route('admin.products.index') }}" class="button button-muted">Back to books</a>
-            <a href="{{ route('admin.products.edit', $product) }}" class="button button-primary"><x-icon name="edit" class="h-4 w-4"/> Edit book</a>
+            @can('books.edit')<a href="{{ route('admin.products.edit', $product) }}" class="button button-primary"><x-icon name="edit" class="h-4 w-4"/> Edit book</a>@endcan
         </div>
     </div>
 
@@ -86,6 +86,7 @@
                 <div><dt>Category</dt><dd>{{ $product->category->name }}</dd></div>
                 <div><dt>Subcategory</dt><dd>{{ $product->subcategory?->name ?? 'Not assigned' }}</dd></div>
                 <div><dt>Publisher</dt><dd>{{ $product->brand->name }}</dd></div>
+                <div><dt>Vendor</dt><dd>{{ $product->vendor?->name ?? 'Unassigned' }}</dd></div>
                 <div><dt>Language</dt><dd>{{ $product->language ?: 'Not specified' }}</dd></div>
                 <div><dt>Edition</dt><dd>{{ $product->edition ?: 'Not specified' }}</dd></div>
                 <div><dt>Publication date</dt><dd>{{ $product->published_at?->format('M j, Y') ?? 'Not specified' }}</dd></div>

@@ -1,4 +1,4 @@
-# Folio Books Admin
+# book-store Admin
 
 A Laravel 13 bookstore administration panel for organizing a book catalogue, managing inventory, and maintaining categories, subcategories, and publishers.
 

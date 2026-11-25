@@ -12,6 +12,7 @@
             @if ($errors->any())<div class="form-alert" role="alert">Please review the highlighted fields and try again.</div>@endif
             <form method="POST" action="{{ route('admin.settings.update') }}" enctype="multipart/form-data" data-loading>
                 @csrf @method('PUT')
+                @cannot('profile.edit')<fieldset disabled>@endcannot
                 <div class="profile-photo-section">
                     <x-user-avatar :user="$user" class="avatar avatar--large"/>
                     <div class="profile-photo-controls">
@@ -38,9 +39,10 @@
                         <div class="field"><label class="field-label" for="password_confirmation">Confirm new password</label><input class="form-input" id="password_confirmation" name="password_confirmation" type="password" autocomplete="new-password"></div>
                     </div>
                 </section>
-                <div class="form-actions"><button class="button button-primary" type="submit" data-loading-button>Save settings</button></div>
+                @can('profile.edit')<div class="form-actions"><button class="button button-primary" type="submit" data-loading-button>Save settings</button></div>@endcan
+                @cannot('profile.edit')</fieldset>@endcannot
             </form>
         </section>
-        <aside class="settings-card"><h2>Account security</h2><p>A few small practices keep your bookstore workspace safe.</p><div class="security-note"><strong>Administrator-only access</strong>Only administrator accounts can access the private store dashboard. There is no public registration page.</div><div class="security-note" style="margin-top: 10px"><strong>Strong password</strong>Choose a unique password with at least 12 characters. Your password is stored as a secure hash.</div></aside>
+        <aside class="settings-card"><h2>Account security</h2><p>A few small practices keep your bookstore workspace safe.</p><div class="security-note"><strong>Role-protected access</strong>Active roles determine which admin modules your account can access. There is no public registration page.</div><div class="security-note" style="margin-top: 10px"><strong>Strong password</strong>Choose a unique password with at least 12 characters. Your password is stored as a secure hash.</div></aside>
     </div>
 @endsection

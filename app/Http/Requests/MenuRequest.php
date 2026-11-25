@@ -12,7 +12,7 @@ class MenuRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('menu') ? 'menu-master.edit' : 'menu-master.create');
     }
 
     public function rules(): array

@@ -14,6 +14,7 @@
     <form method="POST" action="{{ route('admin.contact-page-settings.update') }}" enctype="multipart/form-data" data-loading>
         @csrf
         @method('PUT')
+        @cannot('contact-page.edit')<fieldset disabled>@endcannot
 
         <div class="form-layout">
             <div class="panel form-panel">
@@ -79,7 +80,7 @@
                     <div class="form-grid">
                         <div class="field {{ $errors->has('map_location_name') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="map_location_name">Location name</label>
-                            <input class="form-input" id="map_location_name" name="map_location_name" value="{{ old('map_location_name', $settings->map_location_name) }}" maxlength="255" placeholder="Folio Books - Downtown">
+                            <input class="form-input" id="map_location_name" name="map_location_name" value="{{ old('map_location_name', $settings->map_location_name) }}" maxlength="255" placeholder="book-store - Downtown">
                             @error('map_location_name')<p class="field-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="field {{ $errors->has('google_maps_embed_url') ? 'field-has-error' : '' }}">
@@ -213,7 +214,7 @@
                     <div class="form-grid">
                         <div class="field field--full {{ $errors->has('meta_title') ? 'field-has-error' : '' }}">
                             <label class="field-label" for="meta_title">Meta title</label>
-                            <input class="form-input" id="meta_title" name="meta_title" value="{{ old('meta_title', $settings->meta_title) }}" maxlength="255" placeholder="Contact Us | Folio Books">
+                            <input class="form-input" id="meta_title" name="meta_title" value="{{ old('meta_title', $settings->meta_title) }}" maxlength="255" placeholder="Contact Us | book-store">
                             @error('meta_title')<p class="field-error">{{ $message }}</p>@enderror
                         </div>
                         <div class="field field--full {{ $errors->has('meta_description') ? 'field-has-error' : '' }}">
@@ -230,8 +231,7 @@
                 </section>
 
                 <div class="form-actions">
-                    <a class="button button-muted" href="{{ route('admin.dashboard') }}">Cancel</a>
-                    <button class="button button-primary" type="submit" data-loading-button>Save changes</button>
+                    @can('contact-page.edit')<a class="button button-muted" href="{{ route('admin.dashboard') }}">Cancel</a><button class="button button-primary" type="submit" data-loading-button>Save changes</button>@endcan
                 </div>
             </div>
 
@@ -269,5 +269,6 @@
                 </section>
             </aside>
         </div>
+        @cannot('contact-page.edit')</fieldset>@endcannot
     </form>
 @endsection

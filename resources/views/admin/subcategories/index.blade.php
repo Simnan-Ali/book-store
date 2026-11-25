@@ -5,7 +5,7 @@
 @section('content')
     <div class="module-heading">
         <div><p class="eyebrow">A LITTLE MORE SPECIFIC</p><h1>Subcategories</h1><p>Give each category a useful layer of detail.</p></div>
-        <a href="{{ route('admin.subcategories.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New subcategory</a>
+        @can('subcategories.create')<a href="{{ route('admin.subcategories.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New subcategory</a>@endcan
     </div>
 
     <section class="panel filter-panel">
@@ -20,7 +20,7 @@
 
     <section class="panel table-panel">
         @if ($subcategories->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="layers"/></span><strong>{{ request()->hasAny(['q', 'category_id', 'status']) ? 'No subcategories found' : 'Add a little more detail' }}</strong><p>{{ request()->hasAny(['q', 'category_id', 'status']) ? 'Try another search or choose a different filter.' : 'Create subcategories to make browsing your catalogue feel effortless.' }}</p>@if (! request()->hasAny(['q', 'category_id', 'status']))<a href="{{ route('admin.subcategories.create') }}" class="button button-primary button-small">Create subcategory</a>@endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="layers"/></span><strong>{{ request()->hasAny(['q', 'category_id', 'status']) ? 'No subcategories found' : 'Add a little more detail' }}</strong><p>{{ request()->hasAny(['q', 'category_id', 'status']) ? 'Try another search or choose a different filter.' : 'Create subcategories to make browsing your catalogue feel effortless.' }}</p>@if (! request()->hasAny(['q', 'category_id', 'status'])) @can('subcategories.create')<a href="{{ route('admin.subcategories.create') }}" class="button button-primary button-small">Create subcategory</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table">
                 <thead><tr><th>Subcategory</th><th>Parent category</th><th>Books</th><th>Status</th><th>Created</th><th class="text-right">Actions</th></tr></thead>
@@ -31,7 +31,7 @@
                             <td><span class="table-primary">{{ $subcategory->category->name }}</span></td><td>{{ number_format($subcategory->products_count) }}</td>
                             <td><span class="status-pill {{ $subcategory->is_active ? 'status-active' : 'status-inactive' }}">{{ $subcategory->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>{{ $subcategory->created_at->format('M j, Y') }}</td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.subcategories.edit', $subcategory) }}" aria-label="Edit {{ $subcategory->name }}"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.subcategories.destroy', $subcategory) }}" data-confirm="Books assigned to this subcategory must be moved before it can be deleted.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $subcategory->name }}"><x-icon name="trash"/></button></form></div></td>
+                            <td><div class="row-actions">@can('subcategories.edit')<a class="row-action" href="{{ route('admin.subcategories.edit', $subcategory) }}" aria-label="Edit {{ $subcategory->name }}"><x-icon name="edit"/></a>@endcan @can('subcategories.delete')<form method="POST" action="{{ route('admin.subcategories.destroy', $subcategory) }}" data-confirm="Books assigned to this subcategory must be moved before it can be deleted.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $subcategory->name }}"><x-icon name="trash"/></button></form>@endcan</div></td>
                         </tr>
                     @endforeach
                 </tbody>

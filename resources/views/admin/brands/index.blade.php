@@ -5,7 +5,7 @@
 @section('content')
     <div class="module-heading">
         <div><p class="eyebrow">THE NAMES BEHIND THE BOOKS</p><h1>Publishers</h1><p>Keep your publisher directory tidy and connected to the catalogue.</p></div>
-        <a href="{{ route('admin.brands.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New publisher</a>
+        @can('brands.create')<a href="{{ route('admin.brands.create') }}" class="button button-primary"><x-icon name="plus" class="h-4 w-4"/> New publisher</a>@endcan
     </div>
     <section class="panel filter-panel">
         <form method="GET" action="{{ route('admin.brands.index') }}" class="filter-form">
@@ -17,7 +17,7 @@
     </section>
     <section class="panel table-panel">
         @if ($brands->isEmpty())
-            <div class="empty-state"><span class="empty-icon"><x-icon name="publishers"/></span><strong>{{ request()->hasAny(['q', 'status']) ? 'No publishers found' : 'Add your first publisher' }}</strong><p>{{ request()->hasAny(['q', 'status']) ? 'Try adjusting your search or filters.' : 'Publishers bring the stories on your shelves to life.' }}</p>@if (! request()->hasAny(['q', 'status']))<a href="{{ route('admin.brands.create') }}" class="button button-primary button-small">Create publisher</a>@endif</div>
+            <div class="empty-state"><span class="empty-icon"><x-icon name="publishers"/></span><strong>{{ request()->hasAny(['q', 'status']) ? 'No publishers found' : 'Add your first publisher' }}</strong><p>{{ request()->hasAny(['q', 'status']) ? 'Try adjusting your search or filters.' : 'Publishers bring the stories on your shelves to life.' }}</p>@if (! request()->hasAny(['q', 'status'])) @can('brands.create')<a href="{{ route('admin.brands.create') }}" class="button button-primary button-small">Create publisher</a>@endcan @endif</div>
         @else
             <div class="table-wrap"><table class="admin-table">
                 <thead><tr><th>Publisher</th><th>Contact</th><th>Books</th><th>Status</th><th>Added</th><th class="text-right">Actions</th></tr></thead>
@@ -29,7 +29,7 @@
                             <td>{{ number_format($brand->products_count) }}</td>
                             <td><span class="status-pill {{ $brand->is_active ? 'status-active' : 'status-inactive' }}">{{ $brand->is_active ? 'Active' : 'Inactive' }}</span></td>
                             <td>{{ $brand->created_at->format('M j, Y') }}</td>
-                            <td><div class="row-actions"><a class="row-action" href="{{ route('admin.brands.edit', $brand) }}" aria-label="Edit {{ $brand->name }}"><x-icon name="edit"/></a><form method="POST" action="{{ route('admin.brands.destroy', $brand) }}" data-confirm="Publishers that are assigned to books cannot be deleted. Reassign books first.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $brand->name }}"><x-icon name="trash"/></button></form></div></td>
+                            <td><div class="row-actions">@can('brands.edit')<a class="row-action" href="{{ route('admin.brands.edit', $brand) }}" aria-label="Edit {{ $brand->name }}"><x-icon name="edit"/></a>@endcan @can('brands.delete')<form method="POST" action="{{ route('admin.brands.destroy', $brand) }}" data-confirm="Publishers that are assigned to books cannot be deleted. Reassign books first.">@csrf @method('DELETE')<button class="row-action row-action--delete" type="submit" aria-label="Delete {{ $brand->name }}"><x-icon name="trash"/></button></form>@endcan</div></td>
                         </tr>
                     @endforeach
                 </tbody>

@@ -3,18 +3,21 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\InventoryUpdateRequest;
 use App\Http\Requests\ProductRequest;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Product;
 use App\Models\ProductImage;
 use App\Models\Subcategory;
+use App\Models\User;
 use App\Support\ActivityLogger;
 use App\Support\UniqueSlug;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
@@ -34,7 +37,15 @@ class ProductController extends Controller
         ]);
         $isInventory = (bool) $request->route('inventory');
 
-        $products = Product::with(['category', 'subcategory', 'brand'])
+        if (! $isInventory) {
+            Gate::authorize('viewAny', Product::class);
+        }
+
+        $products = Product::with(['category', 'subcategory', 'brand', 'vendor'])
+            ->when(
+                ! $request->user()->isSuperAdmin() && $request->user()->hasActiveRole('vendor'),
+                fn (Builder $query) => $query->where('vendor_id', $request->user()->getKey()),
+            )
             ->when($filters['q'] ?? null, function (Builder $query, string $term): void {
                 $query->where(function (Builder $query) use ($term): void {
                     $query->where('title', 'like', "%{$term}%")
@@ -70,31 +81,42 @@ class ProductController extends Controller
         ]);
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
+        Gate::authorize('create', Product::class);
+
+        $product = new Product([
+            'is_active' => true,
+            'format' => 'Paperback',
+            'low_stock_alert' => 5,
+            'stock_quantity' => 0,
+        ]);
+
         return view('admin.products.form', [
-            'product' => new Product([
-                'is_active' => true,
-                'format' => 'Paperback',
-                'low_stock_alert' => 5,
-                'stock_quantity' => 0,
-            ]),
-            ...$this->formOptions(),
+            'product' => $product,
+            ...$this->formOptions($request->user(), $product),
         ]);
     }
 
     public function show(Product $product): View
     {
-        $product->load(['category', 'subcategory', 'brand', 'images']);
+        Gate::authorize('view', $product);
+
+        $product->load(['category', 'subcategory', 'brand', 'vendor', 'images']);
 
         return view('admin.products.show', ['product' => $product]);
     }
 
     public function store(ProductRequest $request): RedirectResponse
     {
+        Gate::authorize('create', Product::class);
+
         $data = $request->safe()->except(['main_image', 'images']);
         $data['slug'] = UniqueSlug::make($data['title'], 'products');
         $data['main_image'] = $request->file('main_image')?->store('books/covers', 'public');
+        $data['vendor_id'] = ! $request->user()->isSuperAdmin() && $request->user()->hasActiveRole('vendor')
+            ? $request->user()->getKey()
+            : ($data['vendor_id'] ?? null);
 
         DB::transaction(function () use ($request, $data): void {
             $product = Product::create($data);
@@ -105,22 +127,30 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Book added successfully.');
     }
 
-    public function edit(Product $product): View
+    public function edit(Request $request, Product $product): View
     {
+        Gate::authorize('update', $product);
+
         $product->load('images');
 
         return view('admin.products.form', [
             'product' => $product,
-            ...$this->formOptions(),
+            ...$this->formOptions($request->user(), $product),
         ]);
     }
 
     public function update(ProductRequest $request, Product $product): RedirectResponse
     {
+        Gate::authorize('update', $product);
+
         $data = $request->safe()->except(['main_image', 'images', 'remove_image_ids']);
         $data['slug'] = UniqueSlug::make($data['title'], 'products', $product->id);
         $previousCover = $product->main_image;
         $removedPaths = [];
+
+        if (! $request->user()->isSuperAdmin() && $request->user()->hasActiveRole('vendor')) {
+            $data['vendor_id'] = $request->user()->getKey();
+        }
 
         if ($request->hasFile('main_image')) {
             $data['main_image'] = $request->file('main_image')->store('books/covers', 'public');
@@ -150,6 +180,8 @@ class ProductController extends Controller
 
     public function destroy(Product $product): RedirectResponse
     {
+        Gate::authorize('delete', $product);
+
         $paths = $product->images()->pluck('image_path')->all();
 
         DB::transaction(function () use ($product): void {
@@ -167,12 +199,43 @@ class ProductController extends Controller
         return redirect()->route('admin.products.index')->with('success', 'Book deleted successfully.');
     }
 
-    private function formOptions(): array
+    public function updateInventory(InventoryUpdateRequest $request, Product $product): RedirectResponse
     {
+        Gate::authorize('updateInventory', $product);
+
+        $product->update($request->validated());
+        ActivityLogger::record('updated', $product, "Updated inventory for '{$product->title}'.");
+
+        return back()->with('success', 'Inventory updated successfully.');
+    }
+
+    private function formOptions(User $user, Product $product): array
+    {
+        $canAssignVendor = $user->isSuperAdmin() || ! $user->hasActiveRole('vendor');
+        $vendors = collect();
+
+        if ($canAssignVendor) {
+            $vendors = User::query()
+                ->where(function (Builder $query) use ($product): void {
+                    $query->whereHas('roles', fn (Builder $query) => $query
+                        ->where('roles.name', 'vendor')
+                        ->where('roles.guard_name', 'web')
+                        ->where('roles.is_active', true));
+
+                    if ($product->vendor_id !== null) {
+                        $query->orWhereKey($product->vendor_id);
+                    }
+                })
+                ->orderBy('name')
+                ->get(['id', 'name', 'email']);
+        }
+
         return [
             'categories' => Category::orderBy('name')->get(),
             'subcategories' => Subcategory::orderBy('name')->get(),
             'brands' => Brand::orderBy('name')->get(),
+            'vendors' => $vendors,
+            'canAssignVendor' => $canAssignVendor,
         ];
     }
 

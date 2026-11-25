@@ -9,7 +9,7 @@ class SubcategoryRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return (bool) $this->user()?->is_admin;
+        return (bool) $this->user()?->can($this->route('subcategory') ? 'subcategories.edit' : 'subcategories.create');
     }
 
     public function rules(): array

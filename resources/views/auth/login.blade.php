@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign in &middot; Folio Books</title>
+    <title>Sign in &middot; book-store</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="login-body">
@@ -13,7 +13,7 @@
     <main class="login-wrap">
         <a href="{{ route('login') }}" class="brand-lockup login-brand">
             <span class="brand-mark"><x-icon name="book-open" class="h-6 w-6"/></span>
-            <span><strong>folio</strong><small>BOOKS ADMIN</small></span>
+            <span><strong>book-store</strong><small>BOOKS ADMIN</small></span>
         </a>
         <section class="login-card">
             <div class="login-eyebrow"><span></span> YOUR PRIVATE WORKSPACE</div>
