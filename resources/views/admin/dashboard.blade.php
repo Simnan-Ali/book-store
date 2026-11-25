@@ -56,7 +56,7 @@
                                 @if ($product->main_image)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($product->main_image) }}" alt="" loading="lazy">@else<x-icon name="book-open" class="h-5 w-5" data-image-placeholder/>@endif
                             </span>
                             <span class="recent-book-info"><strong>{{ $product->title }}</strong><small>{{ $product->author }} &middot; {{ $product->brand?->name ?? 'No publisher' }}</small></span>
-                            <span class="recent-book-price">${{ number_format((float) $product->selling_price, 2) }}</span>
+                            <span class="recent-book-price">₹{{ number_format((float) $product->selling_price, 2) }}</span>
                         </a>
                     @endforeach
                 </div>

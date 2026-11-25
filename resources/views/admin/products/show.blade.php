@@ -37,8 +37,8 @@
                 @endif
 
                 <div class="product-detail-prices">
-                    <div><span>Selling price</span><strong>${{ number_format((float) $product->selling_price, 2) }}</strong></div>
-                    <div><span>Regular price</span><strong class="product-regular-price">${{ number_format((float) $product->regular_price, 2) }}</strong></div>
+                    <div><span>Selling price</span><strong>₹{{ number_format((float) $product->selling_price, 2) }}</strong></div>
+                    <div><span>Regular price</span><strong class="product-regular-price">₹{{ number_format((float) $product->regular_price, 2) }}</strong></div>
                     @if ($product->discount_percentage)<span class="product-discount-label">{{ $product->discount_percentage }}% off</span>@endif
                 </div>
 

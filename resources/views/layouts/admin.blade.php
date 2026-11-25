@@ -54,10 +54,10 @@
             @endcan
 
             <div class="sidebar-bottom">
-                <div class="sidebar-note">
+                <!-- <div class="sidebar-note">
                     <span class="sidebar-note-icon"><x-icon name="trend" class="h-4 w-4"/></span>
                     <p><strong>Your library, in focus.</strong><br>Everything you need to keep your shelves in order.</p>
-                </div>
+                </div>   -->
                 <form method="POST" action="{{ route('admin.logout') }}">
                     @csrf
                     <button class="nav-link nav-logout" type="submit"><x-icon name="logout"/><span>Sign out</span></button>

@@ -462,13 +462,26 @@ class BookstoreAdminTest extends TestCase
             ->assertSee('The Quiet Atlas')
             ->assertSee('Modern Poetry')
             ->assertSee('Verse House')
-            ->assertSee('Book details');
+            ->assertSee('Book details')
+            ->assertSee('₹20.00')
+            ->assertSee('₹25.00')
+            ->assertDontSee('$20.00');
         $this->get(route('admin.media.index'))->assertOk()->assertSee('The Quiet Atlas');
-        $this->get(route('admin.inventory'))->assertOk()->assertSee('The Quiet Atlas');
+        $this->get(route('admin.inventory'))
+            ->assertOk()
+            ->assertSee('The Quiet Atlas')
+            ->assertSee('₹20.00')
+            ->assertDontSee('$20.00');
         $this->get(route('admin.products.index', ['q' => 'QUIET', 'stock' => 'low']))
             ->assertOk()
             ->assertSee('The Quiet Atlas')
+            ->assertSee('₹20.00')
+            ->assertDontSee('$20.00')
             ->assertSee(route('admin.products.show', $product), false);
+        $this->get(route('admin.dashboard'))
+            ->assertOk()
+            ->assertSee('₹20.00')
+            ->assertDontSee('$20.00');
         $this->get(route('admin.products.show', 999999))->assertNotFound();
 
         $this->from(route('admin.products.create'))
