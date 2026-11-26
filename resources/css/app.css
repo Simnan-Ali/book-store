@@ -569,3 +569,28 @@ button { cursor: pointer; }
     .permission-group { padding: 11px; }
     .inventory-inline-form { align-items: stretch; }
 }
+.footer-management { display: grid; gap: 16px; }
+.footer-brand-grid { display: grid; grid-template-columns: minmax(180px, 240px) minmax(0, 1fr); gap: 22px; }
+.footer-field-stack { display: grid; gap: 13px; align-content: start; }
+.footer-section-card { border: 1px solid #e5ebe5; border-radius: 10px; margin: 14px 0; padding: 16px; background: #fcfdfb; }
+.footer-card-title { display: flex; justify-content: space-between; margin-bottom: 14px; }
+.footer-card-title strong, .footer-social-row > strong { color: #435149; font-size: 13px; }
+.footer-card-title span { color: #8a978e; display: block; font-size: 10px; margin-top: 4px; }
+.footer-row { display: grid; gap: 10px; align-items: end; }
+.footer-section-row { grid-template-columns: minmax(150px, 2fr) minmax(90px, .7fr) minmax(110px, .8fr) auto; }
+.footer-link-fields { grid-template-columns: 1.3fr 2fr .6fr .8fr .8fr; margin-bottom: 10px; }
+.footer-social-fields { grid-template-columns: 2fr 1fr .6fr .8fr; }
+.footer-links-heading { align-items: baseline; border-top: 1px solid #e8eee8; display: flex; gap: 10px; margin: 17px 0 10px; padding-top: 15px; }
+.footer-links-heading strong { color: #506258; font-size: 11px; }
+.footer-links-heading span, .footer-empty { color: #89978e; font-size: 10px; }
+.footer-link-card { background: #fff; border: 1px solid #edf1ec; border-radius: 8px; margin-bottom: 9px; padding: 12px; }
+.footer-link-card > form + form { display: inline-block; margin-top: 6px; }
+.footer-add { border: 1px dashed #cfddd1; border-radius: 8px; margin-top: 12px; padding: 12px; }
+.footer-add summary { color: #426c51; cursor: pointer; font-size: 11px; font-weight: 600; }
+.footer-add form { margin-top: 12px; }
+.footer-delete { margin-top: 12px; text-align: right; }
+.footer-social-row { border-top: 1px solid #edf1ec; padding: 14px 0; }
+.footer-social-row > strong { display: block; margin-bottom: 9px; }
+@media (max-width: 760px) {
+    .footer-brand-grid, .footer-section-row, .footer-link-fields, .footer-social-fields { grid-template-columns: 1fr; }
+}

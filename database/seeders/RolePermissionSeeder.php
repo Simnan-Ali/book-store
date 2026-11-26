@@ -58,6 +58,8 @@ class RolePermissionSeeder extends Seeder
                     'media.view',
                     'contact-page.view', 'contact-page.edit',
                     'about-page.view', 'about-page.edit',
+                    'footer.view', 'footer.edit', 'footer.sections.create', 'footer.sections.edit', 'footer.sections.delete',
+                    'footer.links.create', 'footer.links.edit', 'footer.links.delete', 'footer.social-links.manage',
                     'menu-master.view', 'menu-master.create', 'menu-master.edit', 'menu-master.delete',
                     'profile.view', 'profile.edit',
                 ],

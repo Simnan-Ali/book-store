@@ -1,6 +1,17 @@
 <?php
 
 return [
+    'footer' => [
+        ['name' => 'footer.view', 'display_name' => 'View footer', 'description' => 'Open footer management.'],
+        ['name' => 'footer.edit', 'display_name' => 'Edit footer settings', 'description' => 'Update footer branding, contact and copyright.'],
+        ['name' => 'footer.sections.create', 'display_name' => 'Create footer sections', 'description' => 'Add footer link sections.'],
+        ['name' => 'footer.sections.edit', 'display_name' => 'Edit footer sections', 'description' => 'Update footer link sections.'],
+        ['name' => 'footer.sections.delete', 'display_name' => 'Delete footer sections', 'description' => 'Remove footer link sections.'],
+        ['name' => 'footer.links.create', 'display_name' => 'Create footer links', 'description' => 'Add links to footer sections.'],
+        ['name' => 'footer.links.edit', 'display_name' => 'Edit footer links', 'description' => 'Update footer links.'],
+        ['name' => 'footer.links.delete', 'display_name' => 'Delete footer links', 'description' => 'Remove footer links.'],
+        ['name' => 'footer.social-links.manage', 'display_name' => 'Manage footer social links', 'description' => 'Update footer social media links.'],
+    ],
     'dashboard' => [
         ['name' => 'dashboard.view', 'display_name' => 'View dashboard', 'description' => 'Open the admin dashboard and its summaries.'],
     ],

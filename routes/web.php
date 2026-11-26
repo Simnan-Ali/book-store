@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\BrandController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ContactPageSettingController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\FooterManagementController;
 use App\Http\Controllers\Admin\MediaLibraryController;
 use App\Http\Controllers\Admin\MenuController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -79,6 +80,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::put('/contact-page-settings', [ContactPageSettingController::class, 'update'])->middleware('can:contact-page.edit')->name('contact-page-settings.update');
     Route::get('/about-page-settings', [AboutPageSettingController::class, 'edit'])->middleware('can:about-page.view')->name('about-page-settings.edit');
     Route::put('/about-page-settings', [AboutPageSettingController::class, 'update'])->middleware('can:about-page.edit')->name('about-page-settings.update');
+
+    Route::get('/footer', [FooterManagementController::class, 'edit'])->middleware('can:footer.view')->name('footer.edit');
+    Route::put('/footer', [FooterManagementController::class, 'update'])->middleware('can:footer.edit')->name('footer.update');
+    Route::post('/footer/sections', [FooterManagementController::class, 'storeSection'])->middleware('can:footer.sections.create')->name('footer.sections.store');
+    Route::put('/footer/sections/{section}', [FooterManagementController::class, 'updateSection'])->middleware('can:footer.sections.edit')->name('footer.sections.update');
+    Route::delete('/footer/sections/{section}', [FooterManagementController::class, 'destroySection'])->middleware('can:footer.sections.delete')->name('footer.sections.destroy');
+    Route::post('/footer/sections/{section}/links', [FooterManagementController::class, 'storeLink'])->middleware('can:footer.links.create')->name('footer.links.store');
+    Route::put('/footer/sections/{section}/links/{link}', [FooterManagementController::class, 'updateLink'])->middleware('can:footer.links.edit')->name('footer.links.update');
+    Route::delete('/footer/sections/{section}/links/{link}', [FooterManagementController::class, 'destroyLink'])->middleware('can:footer.links.delete')->name('footer.links.destroy');
+    Route::put('/footer/social', [FooterManagementController::class, 'updateSocial'])->middleware('can:footer.social-links.manage')->name('footer.social.update');
 
     Route::resource('roles', RoleController::class)->except('show')
         ->middlewareFor('index', 'can:roles.view')
