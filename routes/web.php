@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AboutPageSettingController;
+use App\Http\Controllers\Admin\AdminBrandingController;
 use App\Http\Controllers\Admin\AdminUserController;
 use App\Http\Controllers\Admin\BannerController;
 use App\Http\Controllers\Admin\BannerImageController;
@@ -76,6 +77,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
 
     Route::get('/settings', [ProfileController::class, 'edit'])->middleware('can:profile.view')->name('settings.edit');
     Route::put('/settings', [ProfileController::class, 'update'])->middleware('can:profile.edit')->name('settings.update');
+    Route::get('/admin-branding', [AdminBrandingController::class, 'edit'])->middleware('can:admin-branding.manage')->name('branding.edit');
+    Route::put('/admin-branding', [AdminBrandingController::class, 'update'])->middleware('can:admin-branding.manage')->name('branding.update');
     Route::get('/contact-page-settings', [ContactPageSettingController::class, 'edit'])->middleware('can:contact-page.view')->name('contact-page-settings.edit');
     Route::put('/contact-page-settings', [ContactPageSettingController::class, 'update'])->middleware('can:contact-page.edit')->name('contact-page-settings.update');
     Route::get('/about-page-settings', [AboutPageSettingController::class, 'edit'])->middleware('can:about-page.view')->name('about-page-settings.edit');

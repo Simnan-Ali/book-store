@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>@yield('title', 'Overview') &middot; book-store</title>
+    <title>@yield('title', 'Overview') &middot; {{ $adminBranding->name }}</title>
+    @if ($adminBranding->favicon_path)<link rel="icon" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($adminBranding->favicon_path) }}">@endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="admin-body">
@@ -12,8 +13,8 @@
         <div class="sidebar-scrim" data-sidebar-close></div>
         <aside class="admin-sidebar" id="admin-sidebar">
             <a href="{{ route('admin.dashboard') }}" class="brand-lockup">
-                <span class="brand-mark"><x-icon name="book-open" class="h-6 w-6"/></span>
-                <span><strong>book-store</strong><small>BOOKS ADMIN</small></span>
+                <span class="brand-mark">@if ($adminBranding->logo_path)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($adminBranding->logo_path) }}" alt="" class="brand-logo">@else<x-icon name="book-open" class="h-6 w-6"/>@endif</span>
+                <span><strong>{{ $adminBranding->name }}</strong>@if ($adminBranding->tagline)<small>{{ $adminBranding->tagline }}</small>@endif</span>
             </a>
 
             <div class="sidebar-label">WORKSPACE</div>
@@ -47,12 +48,13 @@
                 </nav>
             @endif
 
-            @can('profile.view')
+            @if (auth()->user()->can('profile.view') || auth()->user()->can('admin-branding.manage'))
                 <div class="sidebar-label sidebar-label--lower">PREFERENCES</div>
                 <nav class="sidebar-nav">
-                    <a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="settings"/><span>My profile</span></a>
+                    @can('profile.view')<a href="{{ route('admin.settings.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.settings.*')])><x-icon name="user"/><span>My profile</span></a>@endcan
+                    @can('admin-branding.manage')<a href="{{ route('admin.branding.edit') }}" @class(['nav-link', 'is-active' => request()->routeIs('admin.branding.*')])><x-icon name="settings"/><span>Settings</span></a>@endcan
                 </nav>
-            @endcan
+            @endif
 
             <div class="sidebar-bottom">
                 <!-- <div class="sidebar-note">
@@ -101,7 +103,7 @@
                 @endif
                 @yield('content')
             </main>
-            <footer class="page-footer"><span>&copy; {{ now()->year }} book-store</span><span>Made for the love of reading.</span></footer>
+            <footer class="page-footer"><span>&copy; {{ now()->year }} {{ $adminBranding->name }}</span><span>Made for the love of reading.</span></footer>
         </div>
     </div>
 

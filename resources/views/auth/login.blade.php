@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sign in &middot; book-store</title>
+    <title>Sign in &middot; {{ $adminBranding->name }}</title>
+    @if ($adminBranding->favicon_path)<link rel="icon" href="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($adminBranding->favicon_path) }}">@endif
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="login-body">
@@ -12,8 +13,8 @@
     <div class="login-decoration login-decoration--two"></div>
     <main class="login-wrap">
         <a href="{{ route('login') }}" class="brand-lockup login-brand">
-            <span class="brand-mark"><x-icon name="book-open" class="h-6 w-6"/></span>
-            <span><strong>book-store</strong><small>BOOKS ADMIN</small></span>
+            <span class="brand-mark">@if ($adminBranding->logo_path)<img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($adminBranding->logo_path) }}" alt="" class="brand-logo">@else<x-icon name="book-open" class="h-6 w-6"/>@endif</span>
+            <span><strong>{{ $adminBranding->name }}</strong>@if ($adminBranding->tagline)<small>{{ $adminBranding->tagline }}</small>@endif</span>
         </a>
         <section class="login-card">
             <div class="login-eyebrow"><span></span> YOUR PRIVATE WORKSPACE</div>
