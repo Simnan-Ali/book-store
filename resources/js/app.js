@@ -1,3 +1,28 @@
+const fallbackImage = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><g transform="translate(32 32) scale(1.5)" fill="none" stroke="#829589" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7v14m0-14C9 4 6 4 3 5v14c3-1 6-1 9 2m0-14c3-3 6-3 9-2v14c-3-1-6-1-9 2"/></g></svg>')}`;
+
+function showImageFallback(image) {
+    if (!image.getAttribute('src') || image.src === fallbackImage) return;
+
+    image.classList.add('image-fallback');
+    image.removeAttribute('srcset');
+    image.src = fallbackImage;
+}
+
+document.addEventListener('error', (event) => {
+    if (event.target instanceof HTMLImageElement) showImageFallback(event.target);
+}, true);
+
+document.addEventListener('load', (event) => {
+    if (event.target instanceof HTMLImageElement && event.target.src !== fallbackImage) {
+        event.target.classList.remove('image-fallback');
+    }
+}, true);
+
+// Image errors may fire before the deferred application script runs.
+document.querySelectorAll('img').forEach((image) => {
+    if (image.complete && image.naturalWidth === 0) showImageFallback(image);
+});
+
 const sidebar = document.querySelector('#admin-sidebar');
 const scrim = document.querySelector('.sidebar-scrim');
 

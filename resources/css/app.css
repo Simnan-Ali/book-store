@@ -35,6 +35,7 @@ button { cursor: pointer; }
 .brand-lockup small { color: #9aa39f; font-size: 8px; font-weight: 700; letter-spacing: 1.65px; margin-top: 5px; }
 .brand-mark { align-items: center; background: #e9f1eb; border-radius: 12px; color: var(--green); display: inline-flex; height: 42px; justify-content: center; width: 42px; }
 .brand-logo { width: 100%; height: 100%; object-fit: contain; border-radius: 12px; }
+img.image-fallback { background: #f1f5f1; object-fit: contain !important; }
 .sidebar-label { color: #a0a8a4; font-size: 9px; font-weight: 750; letter-spacing: 1.6px; margin: 0 0 10px 12px; }
 .sidebar-label--lower { margin-top: 28px; }
 .sidebar-nav { display: grid; gap: 4px; }
