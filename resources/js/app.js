@@ -57,20 +57,35 @@ if (accountMenu) {
 
 const confirmDialog = document.querySelector('#confirm-dialog');
 let pendingForm = null;
+let pendingSubmitter = null;
 
-document.querySelectorAll('form[data-confirm]').forEach((form) => {
+document.querySelectorAll('form').forEach((form) => {
     form.addEventListener('submit', (event) => {
         if (form.dataset.confirmed === 'true') {
             form.dataset.confirmed = 'false';
             return;
         }
 
+        const isDelete = form.dataset.confirm !== undefined
+            || form.querySelector('input[name="_method"][value="DELETE"]');
+        const hasRemovals = form.querySelector('input[type="checkbox"][name^="remove_"]:checked:not(:disabled)');
+        if (!isDelete && !hasRemovals) return;
+
+        const confirmationMessage = form.dataset.confirm || (hasRemovals
+            ? 'Remove the selected images when these changes are saved?'
+            : 'This action cannot be undone.');
+        if (!confirmDialog?.showModal) {
+            if (!window.confirm(confirmationMessage)) event.preventDefault();
+            return;
+        }
+
         event.preventDefault();
         pendingForm = form;
+        pendingSubmitter = event.submitter;
         const message = confirmDialog?.querySelector('[data-confirm-message]');
 
         if (message) {
-            message.textContent = form.dataset.confirm || 'This action cannot be undone.';
+            message.textContent = confirmationMessage;
         }
 
         confirmDialog?.showModal();
@@ -80,14 +95,18 @@ document.querySelectorAll('form[data-confirm]').forEach((form) => {
 confirmDialog?.querySelector('[data-confirm-submit]')?.addEventListener('click', () => {
     if (!pendingForm) return;
 
-    pendingForm.dataset.confirmed = 'true';
-    confirmDialog.close();
-    pendingForm.requestSubmit();
+    const form = pendingForm;
+    const submitter = pendingSubmitter;
+    form.dataset.confirmed = 'true';
     pendingForm = null;
+    pendingSubmitter = null;
+    confirmDialog.close();
+    form.requestSubmit(submitter || undefined);
 });
 
 confirmDialog?.addEventListener('close', () => {
     pendingForm = null;
+    pendingSubmitter = null;
 });
 
 document.querySelectorAll('[data-permissions-toggle]').forEach((button) => {
@@ -102,6 +121,42 @@ document.querySelectorAll('[data-permissions-toggle]').forEach((button) => {
 
         button.textContent = shouldCheck ? 'Deselect all' : 'Select all';
     });
+});
+
+document.querySelectorAll('.permission-groups').forEach((grid) => {
+    const groups = [...grid.querySelectorAll('.permission-group')];
+    let scheduled = false;
+
+    const layoutGroups = () => {
+        scheduled = false;
+        const styles = window.getComputedStyle(grid);
+        const rowHeight = parseFloat(styles.gridAutoRows);
+        const gap = parseFloat(styles.rowGap) || 0;
+
+        if (!rowHeight) return;
+
+        groups.forEach((group) => {
+            const span = Math.ceil((group.getBoundingClientRect().height + gap) / (rowHeight + gap));
+            const value = `span ${span}`;
+            if (group.style.gridRowEnd !== value) group.style.gridRowEnd = value;
+        });
+    };
+
+    const scheduleLayout = () => {
+        if (scheduled) return;
+        scheduled = true;
+        window.requestAnimationFrame(layoutGroups);
+    };
+
+    grid.classList.add('is-compact');
+    if ('ResizeObserver' in window) {
+        const observer = new ResizeObserver(scheduleLayout);
+        observer.observe(grid);
+        groups.forEach((group) => observer.observe(group));
+    } else {
+        window.addEventListener('resize', scheduleLayout);
+    }
+    scheduleLayout();
 });
 
 document.querySelectorAll('[data-toast]').forEach((toast) => {
@@ -299,7 +354,8 @@ sellingPrice?.addEventListener('input', updateDiscount);
 updateDiscount();
 
 document.querySelectorAll('form[data-loading]').forEach((form) => {
-    form.addEventListener('submit', () => {
+    form.addEventListener('submit', (event) => {
+        if (event.defaultPrevented) return;
         const button = form.querySelector('[data-loading-button]');
         if (!button) return;
 

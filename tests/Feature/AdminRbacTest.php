@@ -16,6 +16,52 @@ class AdminRbacTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_role_permission_groups_follow_sidebar_order_on_create_and_edit(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->seed(RolePermissionSeeder::class);
+        Permission::create([
+            'name' => 'reports.export',
+            'guard_name' => 'web',
+            'display_name' => 'Export reports',
+            'module' => 'reports',
+        ]);
+
+        $expectedOrder = [
+            '<legend>Overview</legend>', '<legend>Categories</legend>', '<legend>Subcategories</legend>',
+            '<legend>Publishers</legend>', '<legend>Books</legend>', '<legend>Inventory</legend>',
+            '<legend>Media library</legend>', '<legend>Banner Management</legend>', '<legend>Menu Master</legend>',
+            '<legend>Contact Us Page Master</legend>', '<legend>About Us Page Master</legend>', '<legend>Footer Management</legend>',
+            '<legend>Roles</legend>', '<legend>Permissions</legend>', '<legend>Admin users</legend>',
+            '<legend>My profile</legend>', '<legend>Reports</legend>',
+        ];
+
+        $role = Role::query()->where('name', 'admin')->firstOrFail();
+        $this->actingAs($admin)->get(route('admin.roles.create'))->assertOk()->assertSeeInOrder($expectedOrder, false);
+        $this->get(route('admin.roles.edit', $role))->assertOk()->assertSeeInOrder($expectedOrder, false)
+            ->assertSee('value="categories.view"', false)
+            ->assertViewHas('selectedPermissions', fn (array $permissions): bool => in_array('categories.view', $permissions, true));
+    }
+
+    public function test_permission_key_format_explains_how_to_match_its_module(): void
+    {
+        $admin = User::factory()->create(['is_admin' => true]);
+        $this->seed(RolePermissionSeeder::class);
+        $this->actingAs($admin);
+
+        $data = ['display_name' => 'View module', 'name' => 'View-module', 'module' => 'test-module'];
+        $this->from(route('admin.permissions.create'))->post(route('admin.permissions.store'), $data)
+            ->assertSessionHasErrors(['name' => 'Use lowercase letters and numbers. Start the key with the module followed by a dot, for example: test-module.view.']);
+
+        $data['name'] = 'other.view';
+        $this->post(route('admin.permissions.store'), $data)
+            ->assertSessionHasErrors(['name' => 'The permission key must start with test-module. For example: test-module.view']);
+
+        $data['name'] = 'test-module.view';
+        $this->post(route('admin.permissions.store'), $data)->assertRedirect(route('admin.permissions.index'));
+        $this->assertDatabaseHas('permissions', ['name' => 'test-module.view', 'module' => 'test-module']);
+    }
+
     public function test_permissions_gate_admin_routes_and_inactive_roles_revoke_access(): void
     {
         $role = $this->createRoleWithPermissions('catalog-reader', ['categories.view']);

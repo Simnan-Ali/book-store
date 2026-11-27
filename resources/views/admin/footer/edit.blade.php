@@ -79,14 +79,14 @@
                                 @can('footer.links.edit')<button class="button button-outline button-small" type="submit">Save link</button>@endcan
                                 @cannot('footer.links.edit')</fieldset>@endcannot
                             </form>
-                            @can('footer.links.delete')<form method="POST" action="{{ route('admin.footer.links.destroy', [$section, $link]) }}" onsubmit="return confirm('Delete this link?')">@csrf @method('DELETE')<button class="button button-muted button-small" type="submit">Delete link</button></form>@endcan
+                            @can('footer.links.delete')<form method="POST" action="{{ route('admin.footer.links.destroy', [$section, $link]) }}" data-confirm="Delete this link?">@csrf @method('DELETE')<button class="button button-muted button-small" type="submit">Delete link</button></form>@endcan
                         </div>
                     @endforeach
                     @can('footer.links.create')
                         <details class="footer-add" @if (old('_footer_form') === 'new-link-'.$section->id) open @endif><summary>Add a link</summary><form method="POST" action="{{ route('admin.footer.links.store', $section) }}">@csrf <input type="hidden" name="_footer_form" value="new-link-{{ $section->id }}"> @include('admin.footer.link-fields', ['link' => null, 'formKey' => 'new-link-'.$section->id])<button class="button button-outline button-small" type="submit">Add link</button></form></details>
                     @endcan
                     @can('footer.sections.delete')
-                        @if ($section->links->isEmpty() || auth()->user()->can('footer.links.delete'))<form class="footer-delete" method="POST" action="{{ route('admin.footer.sections.destroy', $section) }}" onsubmit="return confirm('Delete this section and all its links?')">@csrf @method('DELETE')<button class="button button-muted button-small" type="submit">Delete section</button></form>@endif
+                        @if ($section->links->isEmpty() || auth()->user()->can('footer.links.delete'))<form class="footer-delete" method="POST" action="{{ route('admin.footer.sections.destroy', $section) }}" data-confirm="Delete this section and all its links?">@csrf @method('DELETE')<button class="button button-muted button-small" type="submit">Delete section</button></form>@endif
                     @endcan
                 </div>
             @empty

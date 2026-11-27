@@ -26,7 +26,14 @@
                         <div class="field field--full {{ $errors->has('description') ? 'field-has-error' : '' }}"><label class="field-label" for="description">Description</label><textarea class="form-textarea" id="description" name="description" rows="3" maxlength="2000">{{ old('description', $role->description) }}</textarea>@error('description')<p class="field-error">{{ $message }}</p>@enderror</div>
                     </div>
                 </section>
+            </div>
 
+            <aside class="form-sidebar">
+                <section class="side-form-card"><h3>Role status</h3><p>Deactivating a role immediately disables its inherited permissions.</p><select class="form-select status-select" name="is_active" aria-label="Role status"><option value="1" @selected((string) old('is_active', (int) $role->is_active) === '1')>Active</option><option value="0" @selected((string) old('is_active', (int) $role->is_active) === '0')>Inactive</option></select>@error('is_active')<p class="field-error">{{ $message }}</p>@enderror</section>
+                <section class="side-form-card"><h3>Security note</h3><p>Only a Super Admin can grant role, permission, or user-administration capabilities.</p></section>
+            </aside>
+
+            <div class="panel form-panel role-permissions-panel">
                 <section class="form-section">
                     <div class="form-section-heading"><span class="form-section-number">02</span><div><h2>Permissions</h2><p>Select what this role can see and manage. Inactive roles cannot grant access.</p></div></div>
                     @error('permissions')<p class="field-error">{{ $message }}</p>@enderror
@@ -34,8 +41,8 @@
                         @foreach ($permissionGroups as $module => $permissions)
                             @php($groupKey = 'permission-group-'.$loop->index)
                             <fieldset class="permission-group">
-                                <legend>{{ \Illuminate\Support\Str::headline($module) }}</legend>
-                                <button class="filter-reset" type="button" data-permissions-toggle="{{ $groupKey }}">Select all</button>
+                                <legend>{{ $moduleLabels[$module] ?? \Illuminate\Support\Str::headline($module) }}</legend>
+                                <div class="permission-group-actions"><button class="filter-reset" type="button" data-permissions-toggle="{{ $groupKey }}">Select all</button></div>
                                 <div class="permission-options">
                                     @foreach ($permissions as $permission)
                                         <label class="permission-option">
@@ -52,10 +59,6 @@
                 <div class="form-actions"><a class="button button-muted" href="{{ route('admin.roles.index') }}">Cancel</a><button class="button button-primary" type="submit" data-loading-button>{{ $role->exists ? 'Save changes' : 'Create role' }}</button></div>
             </div>
 
-            <aside class="form-sidebar">
-                <section class="side-form-card"><h3>Role status</h3><p>Deactivating a role immediately disables its inherited permissions.</p><select class="form-select status-select" name="is_active" aria-label="Role status"><option value="1" @selected((string) old('is_active', (int) $role->is_active) === '1')>Active</option><option value="0" @selected((string) old('is_active', (int) $role->is_active) === '0')>Inactive</option></select>@error('is_active')<p class="field-error">{{ $message }}</p>@enderror</section>
-                <section class="side-form-card"><h3>Security note</h3><p>Only a Super Admin can grant role, permission, or user-administration capabilities.</p></section>
-            </aside>
         </div>
     </form>
 @endsection

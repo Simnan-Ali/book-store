@@ -15,6 +15,25 @@ use Spatie\Permission\PermissionRegistrar;
 
 class RoleController extends Controller
 {
+    private const MODULE_LABELS = [
+        'dashboard' => 'Overview',
+        'categories' => 'Categories',
+        'subcategories' => 'Subcategories',
+        'brands' => 'Publishers',
+        'books' => 'Books',
+        'inventory' => 'Inventory',
+        'media' => 'Media library',
+        'banners' => 'Banner Management',
+        'menu-master' => 'Menu Master',
+        'contact-page' => 'Contact Us Page Master',
+        'about-page' => 'About Us Page Master',
+        'footer' => 'Footer Management',
+        'roles' => 'Roles',
+        'permissions' => 'Permissions',
+        'users' => 'Admin users',
+        'profile' => 'My profile',
+    ];
+
     public function index(Request $request): View
     {
         $filters = $request->validate([
@@ -41,6 +60,7 @@ class RoleController extends Controller
         return view('admin.roles.form', [
             'role' => new Role(['guard_name' => 'web', 'is_active' => true]),
             'permissionGroups' => $this->permissionGroups(),
+            'moduleLabels' => self::MODULE_LABELS,
             'selectedPermissions' => [],
         ]);
     }
@@ -70,6 +90,7 @@ class RoleController extends Controller
         return view('admin.roles.form', [
             'role' => $role,
             'permissionGroups' => $this->permissionGroups(),
+            'moduleLabels' => self::MODULE_LABELS,
             'selectedPermissions' => $role->permissions->pluck('name')->all(),
         ]);
     }
@@ -117,11 +138,14 @@ class RoleController extends Controller
      */
     private function permissionGroups(): Collection
     {
+        $moduleOrder = array_flip(array_keys(self::MODULE_LABELS));
+
         return Permission::query()
             ->where('guard_name', 'web')
             ->orderBy('module')
             ->orderBy('display_name')
             ->get()
-            ->groupBy(fn (Permission $permission): string => $permission->module ?: 'General');
+            ->groupBy(fn (Permission $permission): string => $permission->module ?: 'General')
+            ->sortBy(fn ($permissions, string $module): string => sprintf('%03d-%s', $moduleOrder[$module] ?? count($moduleOrder), strtolower($module)));
     }
 }

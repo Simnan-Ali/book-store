@@ -47,11 +47,21 @@ class PermissionRequest extends FormRequest
                 if (
                     is_string($name)
                     && is_string($module)
+                    && ! $validator->errors()->has('name')
+                    && ! $validator->errors()->has('module')
                     && ! str_starts_with($name, $module.'.')
                 ) {
-                    $validator->errors()->add('name', 'The permission key must start with its module name and a period.');
+                    $validator->errors()->add('name', "The permission key must start with {$module}. For example: {$module}.view");
                 }
             },
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.regex' => 'Use lowercase letters and numbers. Start the key with the module followed by a dot, for example: test-module.view.',
+            'module.regex' => 'Use lowercase letters and numbers, with hyphens between words, for example: test-module.',
         ];
     }
 }

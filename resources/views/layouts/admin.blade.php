@@ -107,13 +107,13 @@
         </div>
     </div>
 
-    <dialog class="confirm-dialog" id="confirm-dialog">
+    <dialog class="confirm-dialog" id="confirm-dialog" aria-labelledby="confirm-dialog-title" aria-describedby="confirm-dialog-message">
         <form method="dialog" class="confirm-dialog-card">
             <span class="dialog-warning"><x-icon name="trash" class="h-5 w-5"/></span>
-            <h2>Delete this item?</h2>
-            <p data-confirm-message>This action cannot be undone.</p>
+            <h2 id="confirm-dialog-title">Delete this item?</h2>
+            <p id="confirm-dialog-message" data-confirm-message>This action cannot be undone.</p>
             <div class="dialog-actions">
-                <button class="button button-muted" value="cancel">Keep it</button>
+                <button class="button button-muted" value="cancel" autofocus>Keep it</button>
                 <button class="button button-danger" type="button" data-confirm-submit>Yes, delete</button>
             </div>
         </form>
